@@ -1,15 +1,27 @@
-# Stage 1: Development & Build
-FROM node:24-alpine AS development
+#  Build & Dev 
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
-COPY . .
-CMD ["npm", "run", "dev"]
+RUN npm ci
 
-# Stage 2: Production
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+COPY . .
+
+# Production 
 FROM node:24-alpine AS production
 WORKDIR /app
+ENV NODE_ENV=production
+
+# Install ONLY production
 COPY package*.json ./
 RUN npm ci --only=production
-COPY --from=development /app/dist ./dist
-CMD ["node", "dist/index.js"]
+
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+COPY --from=build /app/src ./src
+COPY --from=build /app/tsconfig.json ./
+
+CMD npx prisma db push && node --experimental-strip-types -r tsconfig-paths/register src/index.ts

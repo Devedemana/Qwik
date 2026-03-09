@@ -14,28 +14,19 @@ if (isDevelopment) {
 }
 
 export const envSchema = z.object({
-  // Environment & Stage
   NODE_ENV: z.enum(['production', 'development', 'test']).default('development'),
   APP_STAGE: z.enum(['production', 'dev', 'test']).default('dev'),
-  
-  // Server Config
   PORT: z.coerce.number().positive().default(3000),
-  DATABASE_URL: z.string().regex( /^mongodb(\+srv)?:\/\//, "DATABASE_URL must be a valid MongoDB connection string (starting with mongodb:// or mongodb+srv://)" ),
-  // Auth
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters for security'),
+  // Prisma MongoDB URL validation
+  DATABASE_URL: z.string().url().regex(/^mongodb(\+srv)?:\/\//, "DATABASE_URL must be a valid MongoDB connection string"),
+  JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
-  
-  // Password Hashing
   BCRYPT_ROUNDS: z.coerce.number().min(12).default(12),
   BECRYPT_ROTATE: z.coerce.number().min(10).max(12).default(10),
-
-  // App Logic (Habit Tracker)
   MAX_ACTIVE_HABITS: z.coerce.number().positive().default(10),
-
-  EMAIL_USER: z.string().email("Must be a valid email address"), 
-  EMAIL_PASSWORD: z.string().min(1, "Email password cannot be empty")
+  EMAIL_USER: z.string().email(), 
+  EMAIL_PASSWORD: z.string().min(1)
 });
-
 // export envschema type
 export type Env = z.infer<typeof envSchema>;
 let env: Env;
