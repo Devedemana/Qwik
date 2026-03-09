@@ -1,0 +1,61 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "include": ["./src", "./tests"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    // File Layout
+    "rootDir": ".",
+    "baseUrl": "src",
+   "paths": {
+      "@/*": ["src/*"],
+      "@configs/*": ["src/configs/*"],
+      "@controllers/*":["src/controllers/*"],
+      "@routes/*":["src/routes/*"],
+      "@modules/*":["src/modules/*"],
+      "@middlewares/*": ["src/middleware/*"],
+      "@schemas/*": ["src/schemas/*"],
+      "@utils/*": ["src/utils/*"],
+      "@services/*":["src/services/*"]
+    },
+    "outDir": "./dist",
+
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "nodenext",
+    "target": "esnext",
+    "types": ["node"],
+    // For nodejs:
+     "lib": ["esnext"],
+
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // import 
+    "allowImportingTsExtensions":true,
+    "noEmit": true,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Style Options
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Recommended Options
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+   
+  }
+}
