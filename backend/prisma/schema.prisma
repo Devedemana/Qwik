@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client"
@@ -13,19 +8,85 @@ datasource db {
   provider = "mongodb"
 }
 
-// SAMPLE MODELS FOR MONGO - TO BE REFINED BY EDEM
 
-model User { 
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  email String  @unique
-  name  String?
-  posts Post[]
-} 
-model Post { 
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  content   String?
-  published Boolean @default(false) 
-  author    User    @relation(fields: [authorId], references: [id]) 
-  authorId  String  @db.ObjectId
-} 
+// ----------------------- SCHEMAS --------------------------
+model User {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  email            String   @unique
+  name             String
+  password         String
+  role             Role     @default(CUSTOMER)
+  dietaryLifestyle String[] // e.g., ["VEGAN", "HALAL"]
+  allergies        String[] // e.g., ["PEANUTS"]
+  orders           Order[]
+  createdAt        DateTime @default(now())
+}
+
+enum Role {
+  CUSTOMER
+  STAFF     // Cafeteria staff
+  ADMIN     // System administrator
+}
+
+model Cafeteria {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String         @unique // e.g., "Akornor", "Main Cafe"
+  isOpen         Boolean        @default(true)
+  capacityStatus CapacityStatus @default(GREEN)
+  menuItems      MenuItem[]
+  orders         Order[]
+}
+
+enum CapacityStatus {
+  GREEN
+  YELLOW
+  RED
+}
+
+model MenuItem {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  cafeteriaId  String    @db.ObjectId
+  name         String
+  description  String?
+  price        Float
+  category     String    // e.g., "Lunch", "Drinks"
+  isAvailable  Boolean   @default(true)
+  allergenTags String[]  // For Automated Allergen Filter
+  imageUrl     String?
+
+  cafeteria    Cafeteria @relation(fields: [cafeteriaId], references: [id])
+}
+
+model Order {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String      @db.ObjectId
+  user         User        @relation(fields: [userId], references: [id])
+  cafeteriaId  String      @db.ObjectId
+  totalAmount  Float
+  status       OrderStatus @default(PENDING_PAYMENT)
+  isPaid       Boolean     @default(false)
+  pickupWindow DateTime    // The specific 15-min slot
+  qrCodeSecret String      @unique // Token scanned at counter
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  items        OrderItem[] 
+  cafeteria    Cafeteria   @relation(fields: [cafeteriaId], references: [id])
+}
+
+
+type OrderItem {
+  menuItemId String @db.ObjectId
+  name       String
+  price      Float
+  quantity   Int
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  RECEIVED
+  PREPPING
+  READY
+  COMPLETED
+  CANCELLED
+}

@@ -3,9 +3,12 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
     test: {
+        include: ['tests/**/*.test.ts'],
+        exclude:  ['**/node_modules/**, **/.git/**'],
         globals: true,
         testTimeout: 10_000,// after 10 seconds
         globalSetup: ['./tests/setup/globalSetup.ts'],
+        setupFiles:['./tests/setup/setup.ts'],
         // Automatically clean up after each test to ensure isolation
         clearMocks: true,
         restoreMocks: true,
@@ -14,7 +17,7 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             enabled:true
-        }
+        },
     },
     plugins: [],
 
