@@ -1,14 +1,18 @@
 import { execSync } from 'node:child_process';
-import { prisma } from '../lib/prisma.ts';
+import { prisma } from '../../src/lib/prisma.ts';
 
 
 export async function setup() {
   console.log('--- Preparing Test Environment ---');
   
   try {
+    // make sure docker compose is ready 
+    console.log('Docker warmming up')
+    execSync('docker compose up mongo -d --wait', { stdio: 'inherit' });
+    // sync db
     console.log('Syncing database schema...');
-      execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
-      execSync('npx prisma generate')
+    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+    execSync('npx prisma generate')
 
     await prisma.$connect();
     console.log('--- Test Environment Ready ---');
@@ -20,11 +24,11 @@ export async function setup() {
 
 
 export async function teardown() {
-  console.log('--- Cleaning Up Test Environment ---');
-  
   try {
-    execSync('npx prisma db resest --force', { stdio: 'inherit' }); 
-
+    execSync('npx prisma db reset --force', { stdio: 'inherit' }); 
+    // stop docker compose 
+    execSync('docker compose stop mongo', { stdio: 'inherit' });
+    console.log('--- Cleaning Up Test Environment ---');
     // 2. Disconnect the client
     await prisma.$disconnect();
     console.log('--- Teardown Complete ---');

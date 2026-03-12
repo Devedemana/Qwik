@@ -1,4 +1,4 @@
-import { prisma } from '../../lib/prisma';
+import { prisma } from '../../src/lib/prisma.ts';
 import { afterAll, beforeEach } from 'vitest';
 
 // Runs before every test in every file

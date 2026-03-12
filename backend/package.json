@@ -38,6 +38,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "prisma": "6.19",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^6.1.1"
   }
 }
