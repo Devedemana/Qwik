@@ -25,7 +25,7 @@ export async function setup() {
 
 export async function teardown() {
   try {
-    execSync('npx prisma db reset --force', { stdio: 'inherit' }); 
+    // execSync('npx prisma db reset --force', { stdio: 'inherit' }); 
     // stop docker compose 
     execSync('docker compose stop mongo', { stdio: 'inherit' });
     console.log('--- Cleaning Up Test Environment ---');

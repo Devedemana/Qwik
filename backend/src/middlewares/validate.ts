@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ZodObject, ZodError, ZodType } from 'zod';
+import { ZodObject, ZodError} from 'zod';
+
 
 export const validateBody = (schema: ZodObject) => 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -27,11 +28,11 @@ export const validateBody = (schema: ZodObject) =>
               message: 'Internal server error'
           });
        }
-    };
-  
+  };
 
+  
  export const validateQuery = (schema: ZodObject) => 
-  async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
       try {
         // validate request body 
         const validatedQuery = schema.safeParse(req.query); 
@@ -53,11 +54,12 @@ export const validateBody = (schema: ZodObject) =>
               message: 'Internal server error'
           });
     }
-     };
+   };
+     
   
-     export const validateParams = (schema: ZodObject) => 
-  async (req: Request, res: Response, next: NextFunction) => {
-      try {
+  export const validateParams = (schema: ZodObject) => 
+      async (req: Request, res: Response, next: NextFunction) =>{
+       try {
         // validate request body 
           const validatedParams = schema.safeParse(req.params); 
           
@@ -73,6 +75,7 @@ export const validateBody = (schema: ZodObject) =>
           }))
         });
       }
+         
       // other than that
      return res.status(500).json({
               status: 'error',

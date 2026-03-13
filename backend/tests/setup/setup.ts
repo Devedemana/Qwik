@@ -1,27 +1,20 @@
 import { prisma } from '../../src/lib/prisma.ts';
-import { afterAll, beforeEach } from 'vitest';
+import {afterEach} from 'vitest';
 
-// Runs before every test in every file
-beforeEach(async () => {
-    // Clear collections in order of dependency to avoid reference errors
-    const deleteOrders = prisma.order.deleteMany();
-    const deleteMenuItems = prisma.menuItem.deleteMany();
-    const deleteCafeterias = prisma.cafeteria.deleteMany();
-    const deleteUsers = prisma.user.deleteMany();
-    try {
-        await prisma.$transaction([
-            deleteOrders,
-            deleteMenuItems,
-            deleteCafeterias,
-            deleteUsers,
-        ]);
-    } catch (err: unknown) {
-        console.error('Error', err.message)
+afterEach(async () => {
+  try {
+    // These run as direct MongoDB commands, bypassing Prisma's internal transactions
+    const collections = ['Order', 'MenuItem', 'Cafeteria', 'User'];
+
+    for (const collection of collections) {
+      await prisma.$runCommandRaw({
+        delete: collection,
+        deletes: [{ q: {}, limit: 0 }],
+      });
     }
-}); 
-    
-    
-// Final safety check for each file
-afterAll(async () => {
-  await prisma.$disconnect();
-})
+  } catch (err: any) {
+    // If the collection doesn't exist yet, Mongo might throw an error. 
+    // We catch it here so it doesn't fail your tests.
+    console.warn('Cleanup warning (safe to ignore if first run):', err.message);
+  }
+});

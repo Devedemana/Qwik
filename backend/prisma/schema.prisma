@@ -17,8 +17,8 @@ model User {
   name             String
   password         String
   role             Role     @default(CUSTOMER)
-  dietaryLifestyle String[] // e.g., ["VEGAN", "HALAL"]
-  allergies        String[] // e.g., ["PEANUTS"]
+  dietaryLifestyle String[]  // e.g., ["VEGAN", "HALAL"]
+  allergies        String[]  // e.g., ["PEANUTS"]
   orders           Order[]
   createdAt        DateTime @default(now())
 }
@@ -38,6 +38,7 @@ model Cafeteria {
   orders         Order[]
 }
 
+//specifies cafetaria congession level
 enum CapacityStatus {
   GREEN
   YELLOW
