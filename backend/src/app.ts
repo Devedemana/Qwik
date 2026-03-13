@@ -25,6 +25,7 @@ app.use('/health', (req, res) => {
     res.status(200).json({
         status: "OK",
         timeStamp: new Date().toISOString(),
+            
         service: "Health checker API "
     });
 })

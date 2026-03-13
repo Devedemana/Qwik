@@ -8,7 +8,7 @@ export async function setup() {
   try {
     // make sure docker compose is ready 
     console.log('Docker warmming up')
-    execSync('docker compose up mongo -d --wait', { stdio: 'inherit' });
+    execSync('docker compose up mongo-test -d --wait', { stdio: 'inherit' });
     // sync db
     console.log('Syncing database schema...');
     execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
