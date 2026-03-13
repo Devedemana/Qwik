@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   api:
@@ -13,23 +12,35 @@ services:
     env_file:
       - .env
       - .env.test
-    environment:
-      - DATABASE_URL=mongodb://${MONGO_USER}:${MONGO_PASS}@mongo:27017/${MONGO_DB}?authSource=admin
     depends_on:
-      - mongo
+      - mongo-dev
+      - mongo-test
       
   # The MongoDB Database
-  mongo:
+  # 1. Development Database (Persists your work)
+  mongo-dev:
     image: mongo:latest
+    container_name: quik-mongo-dev
     ports:
-      - "27017:27017" # Exposed so you can use Compass/Studio3T locally
+      - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
-    env_file:
-      - .env.test 
     volumes:
-      - mongo-data:/data/db # PERSISTENCE: Keeps your data safe
+      - dev-data:/data/db
+
+  # 2. Testing Database (Wiped constantly by Vitest)
+  mongo-test:
+    image: mongo:latest
+    container_name: quik-mongo-test
+    ports:
+      - "27018:27017" # Map internal 27017 to host 27018 to avoid conflict
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - test-data:/data/db
 
 volumes:
-  mongo-data:
+  dev-data:
+  test-data:
