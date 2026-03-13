@@ -2,7 +2,7 @@ import { env as loadEnv} from "custom-env";
 import {z } from 'zod';
 
 //determine app stage
-process.env.APP_STAGE = process.env.APP_STAGE || 'dev'
+process.env.APP_STAGE = process.env.VITEST ? 'test' : (process.env.APP_STAGE || 'dev');
 const isProduction = process.env.APP_STAGE === 'production';
 const isTesting = process.env.APP_STAGE === 'test';
 const isDevelopment = process.env.APP_STAGE === 'dev';
@@ -23,9 +23,6 @@ export const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_ROUNDS: z.coerce.number().min(12).default(12),
   BECRYPT_ROTATE: z.coerce.number().min(10).max(12).default(10),
-  MAX_ACTIVE_HABITS: z.coerce.number().positive().default(10),
-  EMAIL_USER: z.string().email(), 
-  EMAIL_PASSWORD: z.string().min(1)
 });
 // export envschema type
 export type Env = z.infer<typeof envSchema>;

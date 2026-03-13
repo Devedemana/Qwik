@@ -1,0 +1,17 @@
+{
+  "name": "Backend Dev Environment",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "api", // Matches the 'api' service in YAML
+  "workspaceFolder": "/workspace", // Matches  YAML
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "Prisma.prisma",
+        "mongodb.mongodb-vscode" // for DB in VS Code!
+      ]
+    }
+  },
+  "remoteUser": "node", // Dockerfile creates a 'node' user or use 'root'
+  "postCreateCommand": "npm install"
+}

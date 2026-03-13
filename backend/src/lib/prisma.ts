@@ -1,6 +1,12 @@
-import "dotenv/config";
-import { PrismaClient } from "../../prisma/migrations";
+import { PrismaClient } from '../../prisma/generated/prisma/client.ts'
+import { env } from '../../env.ts';
 
-const prisma = new PrismaClient();
+//client 
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+        url: env.DATABASE_URL
+    }
+}});
 
-export { prisma };
+export  { prisma };

@@ -1,0 +1,1 @@
+export { default as merchantRouter } from './merchant.route.ts'
