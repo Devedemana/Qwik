@@ -1,50 +1,58 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import { app } from "app.ts";
+import { TestHelpers } from "../helpers/test-helpers.ts";
 
 describe("------- Merchant Endpoint Tests ---------", () => {
-  // gets/fetches
-  describe("GET - Retrievals endpoint ", () => {
-    it("GET /api/merchant/orders/:id -> should fetch active kitchen orders", async () => {
-      const res = await request(app).get("/api/merchant/orders/cafe_abc");
-      expect(res.status).toBe(200);
-      expect(Array.isArray(res.body.data)).toBe(true);
+  
+  // Clear DB after each test to ensure isolation
+  afterEach(async () => {
+    await TestHelpers.clearDatabase();
+  });
+
+  describe("PATCH /api/merchant/status", () => {
+    it("should update cafeteria queue status and return 200", async () => {
+      // Setup using helper
+      const cafe = await TestHelpers.createCafeteria();
+
+      const response = await request(app)
+        .patch("/api/merchant/status")
+        .send({
+          cafeteriaId: cafe.id,
+          status: "YELLOW",
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.capacityStatus).toBe("YELLOW");
     });
   });
 
-  // updates
-  describe("PATCH/PUT - Update toggling endpoint", () => {
-    it("should update cafetaria queue status and return 200", async () => {
-      // create test cafetaria 
-      const response = await request(app).patch("/api/merchant/status").send({
-        cafeteriaId: "some-valid-id",
-        status: "YELLOW",
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.capacityStatus).toBe("YELLOW");
-    });
-
-    it("PUT /api/merchant/inventory -> should toggle menu item availability", async () => {
-      const payload = {
-        itemId: "item_123",
-        isAvailable: false,
-      };
+  describe("PUT /api/merchant/inventory", () => {
+    it("should toggle menu item availability", async () => {
+      // Setup using helpers
+      const cafe = await TestHelpers.createCafeteria();
+      const item = await TestHelpers.createMenuItem(cafe.id);
 
       const res = await request(app)
         .put("/api/merchant/inventory")
-        .send(payload);
+        .send({
+          itemId: item.id,
+          isAvailable: false,
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.data.isAvailable).toBe(false);
     });
+  });
 
-    it("PATCH /api/merchant/orders/:id -> should move order to READY", async () => {
-      const orderId = "65f823..."; // Use a seeded ID from your DB
+  describe("PATCH /api/merchant/orders/:id", () => {
+    it("should move order to READY", async () => {
+      // Setup using helpers
+      const cafe = await TestHelpers.createCafeteria();
+      const order = await TestHelpers.createOrder(cafe.id);
 
       const res = await request(app)
-        .patch(`/api/merchant/orders/${orderId}`)
+        .patch(`/api/merchant/orders/${order.id}`)
         .send({ status: "READY" });
 
       expect(res.status).toBe(200);

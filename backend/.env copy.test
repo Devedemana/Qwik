@@ -1,0 +1,13 @@
+# Stage and Node Environment
+NODE_ENV=test
+APP_STAGE=test
+# Server Configuration
+PORT=3001
+# DATABASE_URL="mongodb://root:password@mongo-test:27017/quik_test?authSource=admin"
+# Use localhost:5433 for scripts running on your host machine
+DATABASE_URL="postgresql://user:password@localhost:5433/quik_test?schema=public"
+JWT_SECRET="ashesi_qwik_secure_test_secret_32_chars_long"
+JWT_EXPIRES_IN="1h"
+# Security
+BCRYPT_ROUNDS=12
+BECRYPT_ROTATE=10
