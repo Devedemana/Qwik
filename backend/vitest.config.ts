@@ -3,6 +3,9 @@ import tsconfigPaths  from 'vite-tsconfig-paths'
 
 
 export default defineConfig({
+    resolve: {
+        tsconfigPaths: true
+    },
     test: {
         include: ['tests/**/*.test.ts'],
         exclude:  ['**/node_modules/**, **/.git/**'],
@@ -20,6 +23,4 @@ export default defineConfig({
             enabled:true
         },
     },
-    plugins: [tsconfigPaths()],
-
 });

@@ -3,8 +3,6 @@
   "include": ["./src", "./tests"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    // File Layout
-    // "rootDir": ".",
     "baseUrl": "src",
    "paths": {
       "@/*": ["src/*"],
@@ -45,14 +43,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    // "strict": true,
-    // "verbatimModuleSyntax": true,
-    // "isolatedModules": true,
-    // "noUncheckedSideEffectImports": true,
-    // "moduleDetection": "force",
+  
     "skipLibCheck": true,
    
   }

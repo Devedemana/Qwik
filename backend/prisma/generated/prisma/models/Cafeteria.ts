@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums.ts"
 import type * as Prisma from "../internal/prismaNamespace.ts"
 
@@ -238,6 +238,7 @@ export type CafeteriaUncheckedCreateInput = {
 }
 
 export type CafeteriaUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -246,6 +247,7 @@ export type CafeteriaUpdateInput = {
 }
 
 export type CafeteriaUncheckedUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -261,12 +263,14 @@ export type CafeteriaCreateManyInput = {
 }
 
 export type CafeteriaUpdateManyMutationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
 }
 
 export type CafeteriaUncheckedUpdateManyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -367,6 +371,7 @@ export type CafeteriaUpdateToOneWithWhereWithoutMenuItemsInput = {
 }
 
 export type CafeteriaUpdateWithoutMenuItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -374,6 +379,7 @@ export type CafeteriaUpdateWithoutMenuItemsInput = {
 }
 
 export type CafeteriaUncheckedUpdateWithoutMenuItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -413,6 +419,7 @@ export type CafeteriaUpdateToOneWithWhereWithoutOrdersInput = {
 }
 
 export type CafeteriaUpdateWithoutOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -420,6 +427,7 @@ export type CafeteriaUpdateWithoutOrdersInput = {
 }
 
 export type CafeteriaUncheckedUpdateWithoutOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -476,7 +484,19 @@ export type CafeteriaSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   _count?: boolean | Prisma.CafeteriaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cafeteria"]>
 
+export type CafeteriaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  isOpen?: boolean
+  capacityStatus?: boolean
+}, ExtArgs["result"]["cafeteria"]>
 
+export type CafeteriaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  isOpen?: boolean
+  capacityStatus?: boolean
+}, ExtArgs["result"]["cafeteria"]>
 
 export type CafeteriaSelectScalar = {
   id?: boolean
@@ -491,6 +511,8 @@ export type CafeteriaInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   orders?: boolean | Prisma.Cafeteria$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.CafeteriaCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type CafeteriaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CafeteriaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $CafeteriaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Cafeteria"
@@ -621,6 +643,30 @@ export interface CafeteriaDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   createMany<T extends CafeteriaCreateManyArgs>(args?: Prisma.SelectSubset<T, CafeteriaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Cafeterias and returns the data saved in the database.
+   * @param {CafeteriaCreateManyAndReturnArgs} args - Arguments to create many Cafeterias.
+   * @example
+   * // Create many Cafeterias
+   * const cafeteria = await prisma.cafeteria.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Cafeterias and only return the `id`
+   * const cafeteriaWithIdOnly = await prisma.cafeteria.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends CafeteriaCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, CafeteriaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CafeteriaPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Cafeteria.
    * @param {CafeteriaDeleteArgs} args - Arguments to delete one Cafeteria.
    * @example
@@ -685,6 +731,36 @@ export interface CafeteriaDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   updateMany<T extends CafeteriaUpdateManyArgs>(args: Prisma.SelectSubset<T, CafeteriaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Update zero or more Cafeterias and returns the data updated in the database.
+   * @param {CafeteriaUpdateManyAndReturnArgs} args - Arguments to update many Cafeterias.
+   * @example
+   * // Update many Cafeterias
+   * const cafeteria = await prisma.cafeteria.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Cafeterias and only return the `id`
+   * const cafeteriaWithIdOnly = await prisma.cafeteria.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends CafeteriaUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, CafeteriaUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CafeteriaPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Create or update one Cafeteria.
    * @param {CafeteriaUpsertArgs} args - Arguments to update or create a Cafeteria.
    * @example
@@ -702,29 +778,6 @@ export interface CafeteriaDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * })
    */
   upsert<T extends CafeteriaUpsertArgs>(args: Prisma.SelectSubset<T, CafeteriaUpsertArgs<ExtArgs>>): Prisma.Prisma__CafeteriaClient<runtime.Types.Result.GetResult<Prisma.$CafeteriaPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-  /**
-   * Find zero or more Cafeterias that matches the filter.
-   * @param {CafeteriaFindRawArgs} args - Select which filters you would like to apply.
-   * @example
-   * const cafeteria = await prisma.cafeteria.findRaw({
-   *   filter: { age: { $gt: 25 } }
-   * })
-   */
-  findRaw(args?: Prisma.CafeteriaFindRawArgs): Prisma.PrismaPromise<Prisma.JsonObject>
-
-  /**
-   * Perform aggregation operations on a Cafeteria.
-   * @param {CafeteriaAggregateRawArgs} args - Select which aggregations you would like to apply.
-   * @example
-   * const cafeteria = await prisma.cafeteria.aggregateRaw({
-   *   pipeline: [
-   *     { $match: { status: "registered" } },
-   *     { $group: { _id: "$country", total: { $sum: 1 } } }
-   *   ]
-   * })
-   */
-  aggregateRaw(args?: Prisma.CafeteriaAggregateRawArgs): Prisma.PrismaPromise<Prisma.JsonObject>
 
 
   /**
@@ -1097,6 +1150,11 @@ export type CafeteriaFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Skip the first `n` Cafeterias.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Cafeterias.
+   */
   distinct?: Prisma.CafeteriaScalarFieldEnum | Prisma.CafeteriaScalarFieldEnum[]
 }
 
@@ -1130,6 +1188,26 @@ export type CafeteriaCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many Cafeterias.
    */
   data: Prisma.CafeteriaCreateManyInput | Prisma.CafeteriaCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * Cafeteria createManyAndReturn
+ */
+export type CafeteriaCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Cafeteria
+   */
+  select?: Prisma.CafeteriaSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Cafeteria
+   */
+  omit?: Prisma.CafeteriaOmit<ExtArgs> | null
+  /**
+   * The data used to create many Cafeterias.
+   */
+  data: Prisma.CafeteriaCreateManyInput | Prisma.CafeteriaCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1162,6 +1240,32 @@ export type CafeteriaUpdateArgs<ExtArgs extends runtime.Types.Extensions.Interna
  * Cafeteria updateMany
  */
 export type CafeteriaUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Cafeterias.
+   */
+  data: Prisma.XOR<Prisma.CafeteriaUpdateManyMutationInput, Prisma.CafeteriaUncheckedUpdateManyInput>
+  /**
+   * Filter which Cafeterias to update
+   */
+  where?: Prisma.CafeteriaWhereInput
+  /**
+   * Limit how many Cafeterias to update.
+   */
+  limit?: number
+}
+
+/**
+ * Cafeteria updateManyAndReturn
+ */
+export type CafeteriaUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Cafeteria
+   */
+  select?: Prisma.CafeteriaSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Cafeteria
+   */
+  omit?: Prisma.CafeteriaOmit<ExtArgs> | null
   /**
    * The data used to update Cafeterias.
    */
@@ -1240,34 +1344,6 @@ export type CafeteriaDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Cafeterias to delete.
    */
   limit?: number
-}
-
-/**
- * Cafeteria findRaw
- */
-export type CafeteriaFindRawArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
-   */
-  filter?: runtime.InputJsonValue
-  /**
-   * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
-   */
-  options?: runtime.InputJsonValue
-}
-
-/**
- * Cafeteria aggregateRaw
- */
-export type CafeteriaAggregateRawArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
-   */
-  pipeline?: runtime.InputJsonValue[]
-  /**
-   * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
-   */
-  options?: runtime.InputJsonValue
 }
 
 /**

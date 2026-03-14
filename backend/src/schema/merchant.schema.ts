@@ -4,20 +4,14 @@ import { CapacityStatus } from '../../prisma/generated/prisma/enums.ts';
 
 // Validating the QR scan at the counter
 export const VerifyPickupSchema = z.object({
-  body: z.object({
     qrToken: z.string().min(32, "Invalid QR Token"), // Token generated on order payment
     cafeteriaId: z.string().regex(/^[0-9a-fA-F]{24}$/)
-  })
 });
 
 // For moving orders through the kitchen cycle
 export const UpdateOrderStateSchema = z.object({
-  params: z.object({
-    orderId: z.string().regex(/^[0-9a-fA-F]{24}$/)
-  }),
-  body: z.object({
+    orderId: z.string().regex(/^[0-9a-fA-F]{24}$/),
     status: z.enum(['RECEIVED', 'PREPPING', 'READY', 'COMPLETED', 'CANCELLED'])
-  })
 });
 
 export const MerchantStatusSchema = z.object({
@@ -32,22 +26,16 @@ export const InventoryUpdateSchema = z.object({
 
 
 export const InventoryToggleSchema = z.object({
-  body: z.object({
     itemId: z.string().min(1, "Item ID is required"),
     isAvailable: z.boolean()
-  })
 });
 
 export const CafeteriaIdParamSchema = z.object({
-  params: z.object({
-    cafeteriaId: z.string().min(1)
-  })
+  cafeteriaId: z.string().min(1)
 });
 
 export const OrderIdParamSchema = z.object({
-  params: z.object({
     id: z.string().min(1)
-  })
 });
 
 export const AdvanceOrderBodySchema = z.object({

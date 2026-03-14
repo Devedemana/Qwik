@@ -11,66 +11,49 @@
  * Please import the `PrismaClient` class from the `client.ts` file instead.
  */
 
-import * as runtime from "@prisma/client/runtime/library"
+import * as runtime from "@prisma/client/runtime/client"
 import type * as Prisma from "./prismaNamespace.ts"
 
 
 const config: runtime.GetPrismaClientConfig = {
-  "generator": {
-    "name": "client",
-    "provider": {
-      "fromEnvVar": null,
-      "value": "prisma-client"
-    },
-    "output": {
-      "value": "/home/logic/Qwik/backend/prisma/generated/prisma",
-      "fromEnvVar": null
-    },
-    "config": {
-      "engineType": "library"
-    },
-    "binaryTargets": [
-      {
-        "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
-        "native": true
-      }
-    ],
-    "previewFeatures": [],
-    "sourceFilePath": "/home/logic/Qwik/backend/prisma/schema.prisma",
-    "isCustomOutput": true
-  },
-  "relativePath": "../..",
-  "clientVersion": "6.19.2",
-  "engineVersion": "c2990dca591cba766e3b7ef5d9e8a84796e47ab7",
-  "datasourceNames": [
-    "db"
-  ],
-  "activeProvider": "mongodb",
-  "postinstall": false,
-  "inlineDatasources": {
-    "db": {
-      "url": {
-        "fromEnvVar": "DATABASE_URL",
-        "value": null
-      }
-    }
-  },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ----------------------- SCHEMAS --------------------------\nmodel User {\n  id               String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  email            String   @unique\n  name             String\n  password         String\n  role             Role     @default(CUSTOMER)\n  dietaryLifestyle String[] // e.g., [\"VEGAN\", \"HALAL\"]\n  allergies        String[] // e.g., [\"PEANUTS\"]\n  orders           Order[]\n  createdAt        DateTime @default(now())\n}\n\nenum Role {\n  CUSTOMER\n  STAFF // Cafeteria staff\n  ADMIN // System administrator\n}\n\nmodel Cafeteria {\n  id             String         @id @default(auto()) @map(\"_id\") @db.ObjectId\n  name           String         @unique // e.g., \"Akornor\", \"Main Cafe\"\n  isOpen         Boolean        @default(true)\n  capacityStatus CapacityStatus @default(GREEN)\n  menuItems      MenuItem[]\n  orders         Order[]\n}\n\n//specifies cafetaria congession level\nenum CapacityStatus {\n  GREEN\n  YELLOW\n  RED\n}\n\nmodel MenuItem {\n  id           String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  cafeteriaId  String   @db.ObjectId\n  name         String\n  description  String?\n  price        Float\n  category     String // e.g., \"Lunch\", \"Drinks\"\n  isAvailable  Boolean  @default(true)\n  allergenTags String[] // For Automated Allergen Filter\n  imageUrl     String?\n\n  cafeteria Cafeteria @relation(fields: [cafeteriaId], references: [id])\n}\n\nmodel Order {\n  id           String      @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId       String      @db.ObjectId\n  user         User        @relation(fields: [userId], references: [id])\n  cafeteriaId  String      @db.ObjectId\n  totalAmount  Float\n  status       OrderStatus @default(PENDING_PAYMENT)\n  isPaid       Boolean     @default(false)\n  pickupWindow DateTime // The specific 15-min slot\n  qrCodeSecret String      @unique // Token scanned at counter\n  createdAt    DateTime    @default(now())\n  updatedAt    DateTime    @updatedAt\n\n  items     OrderItem[]\n  cafeteria Cafeteria   @relation(fields: [cafeteriaId], references: [id])\n}\n\ntype OrderItem {\n  menuItemId String @db.ObjectId\n  name       String\n  price      Float\n  quantity   Int\n}\n\nenum OrderStatus {\n  PENDING_PAYMENT\n  RECEIVED\n  PREPPING\n  READY\n  COMPLETED\n  CANCELLED\n}\n",
-  "inlineSchemaHash": "78c3f94eb68dff2cf60de01aebc4c08d4aa6225aec14f9a3890ab330e3287b0a",
-  "copyEngine": true,
+  "previewFeatures": [],
+  "clientVersion": "7.5.0",
+  "engineVersion": "280c870be64f457428992c43c1f6d557fab6e29e",
+  "activeProvider": "postgresql",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\n// ----------------------- SCHEMAS --------------------------\n\nmodel User {\n  id               String   @id @default(uuid())\n  email            String   @unique\n  name             String\n  password         String\n  role             Role     @default(CUSTOMER)\n  dietaryLifestyle String[] // Postgres supports native scalar lists (arrays)\n  allergies        String[]\n  orders           Order[]\n  createdAt        DateTime @default(now())\n}\n\nenum Role {\n  CUSTOMER\n  STAFF\n  ADMIN\n}\n\nmodel Cafeteria {\n  id             String         @id @default(uuid())\n  name           String         @unique\n  isOpen         Boolean        @default(true)\n  capacityStatus CapacityStatus @default(GREEN)\n  menuItems      MenuItem[]\n  orders         Order[]\n}\n\nenum CapacityStatus {\n  GREEN\n  YELLOW\n  RED\n}\n\nmodel MenuItem {\n  id           String   @id @default(uuid())\n  cafeteriaId  String\n  name         String\n  description  String?\n  price        Float\n  category     String\n  isAvailable  Boolean  @default(true)\n  allergenTags String[]\n  imageUrl     String?\n\n  cafeteria Cafeteria @relation(fields: [cafeteriaId], references: [id])\n}\n\nmodel Order {\n  id           String      @id @default(uuid())\n  userId       String\n  user         User        @relation(fields: [userId], references: [id])\n  cafeteriaId  String\n  totalAmount  Float\n  status       OrderStatus @default(PENDING_PAYMENT)\n  isPaid       Boolean     @default(false)\n  pickupWindow DateTime\n  qrCodeSecret String      @unique\n  createdAt    DateTime    @default(now())\n  updatedAt    DateTime    @updatedAt\n\n  items     OrderItem[]\n  cafeteria Cafeteria   @relation(fields: [cafeteriaId], references: [id])\n}\n\n// In Postgres, OrderItem must be a model to support relations\nmodel OrderItem {\n  id         String @id @default(uuid())\n  orderId    String\n  menuItemId String\n  name       String\n  price      Float\n  quantity   Int\n\n  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)\n}\n\nenum OrderStatus {\n  PENDING_PAYMENT\n  RECEIVED\n  PREPPING\n  READY\n  COMPLETED\n  CANCELLED\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
     "types": {}
   },
-  "dirname": ""
+  "parameterizationSchema": {
+    "strings": [],
+    "graph": ""
+  }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"id\",\"dbName\":\"_id\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":true,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"default\":{\"name\":\"auto\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"email\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":true,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"name\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"password\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"role\",\"kind\":\"enum\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"Role\",\"nativeType\":null,\"default\":\"CUSTOMER\",\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"dietaryLifestyle\",\"kind\":\"scalar\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"allergies\",\"kind\":\"scalar\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"orders\",\"kind\":\"object\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Order\",\"nativeType\":null,\"relationName\":\"OrderToUser\",\"relationFromFields\":[],\"relationToFields\":[],\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"DateTime\",\"nativeType\":null,\"default\":{\"name\":\"now\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false}],\"primaryKey\":null,\"uniqueFields\":[],\"uniqueIndexes\":[],\"isGenerated\":false},\"Cafeteria\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"id\",\"dbName\":\"_id\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":true,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"default\":{\"name\":\"auto\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"name\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":true,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"isOpen\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"Boolean\",\"nativeType\":null,\"default\":true,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"capacityStatus\",\"kind\":\"enum\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"CapacityStatus\",\"nativeType\":null,\"default\":\"GREEN\",\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"menuItems\",\"kind\":\"object\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"MenuItem\",\"nativeType\":null,\"relationName\":\"CafeteriaToMenuItem\",\"relationFromFields\":[],\"relationToFields\":[],\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"orders\",\"kind\":\"object\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Order\",\"nativeType\":null,\"relationName\":\"CafeteriaToOrder\",\"relationFromFields\":[],\"relationToFields\":[],\"isGenerated\":false,\"isUpdatedAt\":false}],\"primaryKey\":null,\"uniqueFields\":[],\"uniqueIndexes\":[],\"isGenerated\":false},\"MenuItem\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"id\",\"dbName\":\"_id\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":true,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"default\":{\"name\":\"auto\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"cafeteriaId\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":true,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"name\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"description\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":false,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"price\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Float\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"category\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"isAvailable\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"Boolean\",\"nativeType\":null,\"default\":true,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"allergenTags\",\"kind\":\"scalar\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":false,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"cafeteria\",\"kind\":\"object\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Cafeteria\",\"nativeType\":null,\"relationName\":\"CafeteriaToMenuItem\",\"relationFromFields\":[\"cafeteriaId\"],\"relationToFields\":[\"id\"],\"isGenerated\":false,\"isUpdatedAt\":false}],\"primaryKey\":null,\"uniqueFields\":[],\"uniqueIndexes\":[],\"isGenerated\":false},\"Order\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"id\",\"dbName\":\"_id\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":true,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"default\":{\"name\":\"auto\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"userId\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":true,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"user\",\"kind\":\"object\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"User\",\"nativeType\":null,\"relationName\":\"OrderToUser\",\"relationFromFields\":[\"userId\"],\"relationToFields\":[\"id\"],\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"cafeteriaId\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":true,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]],\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"totalAmount\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Float\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"status\",\"kind\":\"enum\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"OrderStatus\",\"nativeType\":null,\"default\":\"PENDING_PAYMENT\",\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"isPaid\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"Boolean\",\"nativeType\":null,\"default\":false,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"pickupWindow\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"DateTime\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"qrCodeSecret\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":true,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"DateTime\",\"nativeType\":null,\"default\":{\"name\":\"now\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"DateTime\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":true},{\"name\":\"items\",\"kind\":\"object\",\"isList\":true,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"OrderItem\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"cafeteria\",\"kind\":\"object\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Cafeteria\",\"nativeType\":null,\"relationName\":\"CafeteriaToOrder\",\"relationFromFields\":[\"cafeteriaId\"],\"relationToFields\":[\"id\"],\"isGenerated\":false,\"isUpdatedAt\":false}],\"primaryKey\":null,\"uniqueFields\":[],\"uniqueIndexes\":[],\"isGenerated\":false}},\"enums\":{\"Role\":{\"values\":[{\"name\":\"CUSTOMER\",\"dbName\":null},{\"name\":\"STAFF\",\"dbName\":null},{\"name\":\"ADMIN\",\"dbName\":null}],\"dbName\":null},\"CapacityStatus\":{\"values\":[{\"name\":\"GREEN\",\"dbName\":null},{\"name\":\"YELLOW\",\"dbName\":null},{\"name\":\"RED\",\"dbName\":null}],\"dbName\":null},\"OrderStatus\":{\"values\":[{\"name\":\"PENDING_PAYMENT\",\"dbName\":null},{\"name\":\"RECEIVED\",\"dbName\":null},{\"name\":\"PREPPING\",\"dbName\":null},{\"name\":\"READY\",\"dbName\":null},{\"name\":\"COMPLETED\",\"dbName\":null},{\"name\":\"CANCELLED\",\"dbName\":null}],\"dbName\":null}},\"types\":{\"OrderItem\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"menuItemId\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":[\"ObjectId\",[]]},{\"name\":\"name\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null},{\"name\":\"price\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Float\",\"nativeType\":null},{\"name\":\"quantity\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"Int\",\"nativeType\":null}],\"primaryKey\":null,\"uniqueFields\":[],\"uniqueIndexes\":[]}}}")
-config.engineWasm = undefined
-config.compilerWasm = undefined
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"dietaryLifestyle\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"allergies\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orders\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"OrderToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Cafeteria\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isOpen\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"capacityStatus\",\"kind\":\"enum\",\"type\":\"CapacityStatus\"},{\"name\":\"menuItems\",\"kind\":\"object\",\"type\":\"MenuItem\",\"relationName\":\"CafeteriaToMenuItem\"},{\"name\":\"orders\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"CafeteriaToOrder\"}],\"dbName\":null},\"MenuItem\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cafeteriaId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"category\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isAvailable\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"allergenTags\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cafeteria\",\"kind\":\"object\",\"type\":\"Cafeteria\",\"relationName\":\"CafeteriaToMenuItem\"}],\"dbName\":null},\"Order\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"OrderToUser\"},{\"name\":\"cafeteriaId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"totalAmount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"OrderStatus\"},{\"name\":\"isPaid\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pickupWindow\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"qrCodeSecret\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"items\",\"kind\":\"object\",\"type\":\"OrderItem\",\"relationName\":\"OrderToOrderItem\"},{\"name\":\"cafeteria\",\"kind\":\"object\",\"type\":\"Cafeteria\",\"relationName\":\"CafeteriaToOrder\"}],\"dbName\":null},\"OrderItem\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"menuItemId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"quantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"order\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"OrderToOrderItem\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.parameterizationSchema = {
+  strings: JSON.parse("[\"where\",\"orderBy\",\"cursor\",\"user\",\"order\",\"items\",\"cafeteria\",\"menuItems\",\"orders\",\"_count\",\"User.findUnique\",\"User.findUniqueOrThrow\",\"User.findFirst\",\"User.findFirstOrThrow\",\"User.findMany\",\"data\",\"User.createOne\",\"User.createMany\",\"User.createManyAndReturn\",\"User.updateOne\",\"User.updateMany\",\"User.updateManyAndReturn\",\"create\",\"update\",\"User.upsertOne\",\"User.deleteOne\",\"User.deleteMany\",\"having\",\"_min\",\"_max\",\"User.groupBy\",\"User.aggregate\",\"Cafeteria.findUnique\",\"Cafeteria.findUniqueOrThrow\",\"Cafeteria.findFirst\",\"Cafeteria.findFirstOrThrow\",\"Cafeteria.findMany\",\"Cafeteria.createOne\",\"Cafeteria.createMany\",\"Cafeteria.createManyAndReturn\",\"Cafeteria.updateOne\",\"Cafeteria.updateMany\",\"Cafeteria.updateManyAndReturn\",\"Cafeteria.upsertOne\",\"Cafeteria.deleteOne\",\"Cafeteria.deleteMany\",\"Cafeteria.groupBy\",\"Cafeteria.aggregate\",\"MenuItem.findUnique\",\"MenuItem.findUniqueOrThrow\",\"MenuItem.findFirst\",\"MenuItem.findFirstOrThrow\",\"MenuItem.findMany\",\"MenuItem.createOne\",\"MenuItem.createMany\",\"MenuItem.createManyAndReturn\",\"MenuItem.updateOne\",\"MenuItem.updateMany\",\"MenuItem.updateManyAndReturn\",\"MenuItem.upsertOne\",\"MenuItem.deleteOne\",\"MenuItem.deleteMany\",\"_avg\",\"_sum\",\"MenuItem.groupBy\",\"MenuItem.aggregate\",\"Order.findUnique\",\"Order.findUniqueOrThrow\",\"Order.findFirst\",\"Order.findFirstOrThrow\",\"Order.findMany\",\"Order.createOne\",\"Order.createMany\",\"Order.createManyAndReturn\",\"Order.updateOne\",\"Order.updateMany\",\"Order.updateManyAndReturn\",\"Order.upsertOne\",\"Order.deleteOne\",\"Order.deleteMany\",\"Order.groupBy\",\"Order.aggregate\",\"OrderItem.findUnique\",\"OrderItem.findUniqueOrThrow\",\"OrderItem.findFirst\",\"OrderItem.findFirstOrThrow\",\"OrderItem.findMany\",\"OrderItem.createOne\",\"OrderItem.createMany\",\"OrderItem.createManyAndReturn\",\"OrderItem.updateOne\",\"OrderItem.updateMany\",\"OrderItem.updateManyAndReturn\",\"OrderItem.upsertOne\",\"OrderItem.deleteOne\",\"OrderItem.deleteMany\",\"OrderItem.groupBy\",\"OrderItem.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"orderId\",\"menuItemId\",\"name\",\"price\",\"quantity\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"userId\",\"cafeteriaId\",\"totalAmount\",\"OrderStatus\",\"status\",\"isPaid\",\"pickupWindow\",\"qrCodeSecret\",\"createdAt\",\"updatedAt\",\"description\",\"category\",\"isAvailable\",\"allergenTags\",\"imageUrl\",\"has\",\"hasEvery\",\"hasSome\",\"isOpen\",\"CapacityStatus\",\"capacityStatus\",\"every\",\"some\",\"none\",\"email\",\"password\",\"Role\",\"role\",\"dietaryLifestyle\",\"allergies\",\"is\",\"isNot\",\"connectOrCreate\",\"upsert\",\"createMany\",\"set\",\"disconnect\",\"delete\",\"connect\",\"updateMany\",\"deleteMany\",\"push\",\"increment\",\"decrement\",\"multiply\",\"divide\"]"),
+  graph: "uwIyUAwIAACpAQAgYgAArgEAMGMAABUAEGQAAK4BADBlAQAAAAFoAQClAQAhfkAAsAEAIY4BAQAAAAGPAQEApQEAIZEBAACvAZEBIpIBAACcAQAgkwEAAJwBACABAAAAAQAgEAMAALoBACAFAAC7AQAgBgAAtAEAIGIAALgBADBjAAADABBkAAC4AQAwZQEApQEAIXYBAKUBACF3AQClAQAheAgAswEAIXoAALkBeiJ7IACmAQAhfEAAsAEAIX0BAKUBACF-QACwAQAhf0AAsAEAIQMDAACiAgAgBQAAowIAIAYAAKACACAQAwAAugEAIAUAALsBACAGAAC0AQAgYgAAuAEAMGMAAAMAEGQAALgBADBlAQAAAAF2AQClAQAhdwEApQEAIXgIALMBACF6AAC5AXoieyAApgEAIXxAALABACF9AQAAAAF-QACwAQAhf0AAsAEAIQMAAAADACABAAAEADACAAAFACAKBAAAtwEAIGIAALUBADBjAAAHABBkAAC1AQAwZQEApQEAIWYBAKUBACFnAQClAQAhaAEApQEAIWkIALMBACFqAgC2AQAhAQQAAKECACAKBAAAtwEAIGIAALUBADBjAAAHABBkAAC1AQAwZQEAAAABZgEApQEAIWcBAKUBACFoAQClAQAhaQgAswEAIWoCALYBACEDAAAABwAgAQAACAAwAgAACQAgDQYAALQBACBiAACxAQAwYwAACwAQZAAAsQEAMGUBAKUBACFoAQClAQAhaQgAswEAIXcBAKUBACGAAQEAsgEAIYEBAQClAQAhggEgAKYBACGDAQAAnAEAIIQBAQCyAQAhAwYAAKACACCAAQAA4AEAIIQBAADgAQAgDQYAALQBACBiAACxAQAwYwAACwAQZAAAsQEAMGUBAAAAAWgBAKUBACFpCACzAQAhdwEApQEAIYABAQCyAQAhgQEBAKUBACGCASAApgEAIYMBAACcAQAghAEBALIBACEDAAAACwAgAQAADAAwAgAADQAgAwAAAAMAIAEAAAQAMAIAAAUAIAEAAAALACABAAAAAwAgAQAAAAcAIAEAAAADACABAAAAAQAgDAgAAKkBACBiAACuAQAwYwAAFQAQZAAArgEAMGUBAKUBACFoAQClAQAhfkAAsAEAIY4BAQClAQAhjwEBAKUBACGRAQAArwGRASKSAQAAnAEAIJMBAACcAQAgAQgAAIwCACADAAAAFQAgAQAAFgAwAgAAAQAgAwAAABUAIAEAABYAMAIAAAEAIAMAAAAVACABAAAWADACAAABACAJCAAAnwIAIGUBAAAAAWgBAAAAAX5AAAAAAY4BAQAAAAGPAQEAAAABkQEAAACRAQKSAQAAnQIAIJMBAACeAgAgAQ8AABoAIAhlAQAAAAFoAQAAAAF-QAAAAAGOAQEAAAABjwEBAAAAAZEBAAAAkQECkgEAAJ0CACCTAQAAngIAIAEPAAAcADABDwAAHAAwCQgAAJMCACBlAQDBAQAhaAEAwQEAIX5AAM0BACGOAQEAwQEAIY8BAQDBAQAhkQEAAJACkQEikgEAAJECACCTAQAAkgIAIAIAAAABACAPAAAfACAIZQEAwQEAIWgBAMEBACF-QADNAQAhjgEBAMEBACGPAQEAwQEAIZEBAACQApEBIpIBAACRAgAgkwEAAJICACACAAAAFQAgDwAAIQAgAgAAABUAIA8AACEAIAMAAAABACAWAAAaACAXAAAfACABAAAAAQAgAQAAABUAIAMJAACNAgAgHAAAjwIAIB0AAI4CACALYgAAqgEAMGMAACgAEGQAAKoBADBlAQCHAQAhaAEAhwEAIX5AAJMBACGOAQEAhwEAIY8BAQCHAQAhkQEAAKsBkQEikgEAAJwBACCTAQAAnAEAIAMAAAAVACABAAAnADAbAAAoACADAAAAFQAgAQAAFgAwAgAAAQAgCQcAAKgBACAIAACpAQAgYgAApAEAMGMAAC4AEGQAAKQBADBlAQAAAAFoAQAAAAGIASAApgEAIYoBAACnAYoBIgEAAAArACABAAAAKwAgCQcAAKgBACAIAACpAQAgYgAApAEAMGMAAC4AEGQAAKQBADBlAQClAQAhaAEApQEAIYgBIACmAQAhigEAAKcBigEiAgcAAIsCACAIAACMAgAgAwAAAC4AIAEAAC8AMAIAACsAIAMAAAAuACABAAAvADACAAArACADAAAALgAgAQAALwAwAgAAKwAgBgcAAIkCACAIAACKAgAgZQEAAAABaAEAAAABiAEgAAAAAYoBAAAAigECAQ8AADMAIARlAQAAAAFoAQAAAAGIASAAAAABigEAAACKAQIBDwAANQAwAQ8AADUAMAYHAADvAQAgCAAA8AEAIGUBAMEBACFoAQDBAQAhiAEgAMwBACGKAQAA7gGKASICAAAAKwAgDwAAOAAgBGUBAMEBACFoAQDBAQAhiAEgAMwBACGKAQAA7gGKASICAAAALgAgDwAAOgAgAgAAAC4AIA8AADoAIAMAAAArACAWAAAzACAXAAA4ACABAAAAKwAgAQAAAC4AIAMJAADrAQAgHAAA7QEAIB0AAOwBACAHYgAAoAEAMGMAAEEAEGQAAKABADBlAQCHAQAhaAEAhwEAIYgBIACSAQAhigEAAKEBigEiAwAAAC4AIAEAAEAAMBsAAEEAIAMAAAAuACABAAAvADACAAArACABAAAADQAgAQAAAA0AIAMAAAALACABAAAMADACAAANACADAAAACwAgAQAADAAwAgAADQAgAwAAAAsAIAEAAAwAMAIAAA0AIAoGAADqAQAgZQEAAAABaAEAAAABaQgAAAABdwEAAAABgAEBAAAAAYEBAQAAAAGCASAAAAABgwEAAOkBACCEAQEAAAABAQ8AAEkAIAllAQAAAAFoAQAAAAFpCAAAAAF3AQAAAAGAAQEAAAABgQEBAAAAAYIBIAAAAAGDAQAA6QEAIIQBAQAAAAEBDwAASwAwAQ8AAEsAMAoGAADoAQAgZQEAwQEAIWgBAMEBACFpCADCAQAhdwEAwQEAIYABAQDmAQAhgQEBAMEBACGCASAAzAEAIYMBAADnAQAghAEBAOYBACECAAAADQAgDwAATgAgCWUBAMEBACFoAQDBAQAhaQgAwgEAIXcBAMEBACGAAQEA5gEAIYEBAQDBAQAhggEgAMwBACGDAQAA5wEAIIQBAQDmAQAhAgAAAAsAIA8AAFAAIAIAAAALACAPAABQACADAAAADQAgFgAASQAgFwAATgAgAQAAAA0AIAEAAAALACAHCQAA4QEAIBwAAOQBACAdAADjAQAgPgAA4gEAID8AAOUBACCAAQAA4AEAIIQBAADgAQAgDGIAAJoBADBjAABXABBkAACaAQAwZQEAhwEAIWgBAIcBACFpCACIAQAhdwEAhwEAIYABAQCbAQAhgQEBAIcBACGCASAAkgEAIYMBAACcAQAghAEBAJsBACEDAAAACwAgAQAAVgAwGwAAVwAgAwAAAAsAIAEAAAwAMAIAAA0AIAEAAAAFACABAAAABQAgAwAAAAMAIAEAAAQAMAIAAAUAIAMAAAADACABAAAEADACAAAFACADAAAAAwAgAQAABAAwAgAABQAgDQMAAN0BACAFAADeAQAgBgAA3wEAIGUBAAAAAXYBAAAAAXcBAAAAAXgIAAAAAXoAAAB6AnsgAAAAAXxAAAAAAX0BAAAAAX5AAAAAAX9AAAAAAQEPAABfACAKZQEAAAABdgEAAAABdwEAAAABeAgAAAABegAAAHoCeyAAAAABfEAAAAABfQEAAAABfkAAAAABf0AAAAABAQ8AAGEAMAEPAABhADANAwAAzgEAIAUAAM8BACAGAADQAQAgZQEAwQEAIXYBAMEBACF3AQDBAQAheAgAwgEAIXoAAMsBeiJ7IADMAQAhfEAAzQEAIX0BAMEBACF-QADNAQAhf0AAzQEAIQIAAAAFACAPAABkACAKZQEAwQEAIXYBAMEBACF3AQDBAQAheAgAwgEAIXoAAMsBeiJ7IADMAQAhfEAAzQEAIX0BAMEBACF-QADNAQAhf0AAzQEAIQIAAAADACAPAABmACACAAAAAwAgDwAAZgAgAwAAAAUAIBYAAF8AIBcAAGQAIAEAAAAFACABAAAAAwAgBQkAAMYBACAcAADJAQAgHQAAyAEAID4AAMcBACA_AADKAQAgDWIAAJABADBjAABtABBkAACQAQAwZQEAhwEAIXYBAIcBACF3AQCHAQAheAgAiAEAIXoAAJEBeiJ7IACSAQAhfEAAkwEAIX0BAIcBACF-QACTAQAhf0AAkwEAIQMAAAADACABAABsADAbAABtACADAAAAAwAgAQAABAAwAgAABQAgAQAAAAkAIAEAAAAJACADAAAABwAgAQAACAAwAgAACQAgAwAAAAcAIAEAAAgAMAIAAAkAIAMAAAAHACABAAAIADACAAAJACAHBAAAxQEAIGUBAAAAAWYBAAAAAWcBAAAAAWgBAAAAAWkIAAAAAWoCAAAAAQEPAAB1ACAGZQEAAAABZgEAAAABZwEAAAABaAEAAAABaQgAAAABagIAAAABAQ8AAHcAMAEPAAB3ADAHBAAAxAEAIGUBAMEBACFmAQDBAQAhZwEAwQEAIWgBAMEBACFpCADCAQAhagIAwwEAIQIAAAAJACAPAAB6ACAGZQEAwQEAIWYBAMEBACFnAQDBAQAhaAEAwQEAIWkIAMIBACFqAgDDAQAhAgAAAAcAIA8AAHwAIAIAAAAHACAPAAB8ACADAAAACQAgFgAAdQAgFwAAegAgAQAAAAkAIAEAAAAHACAFCQAAvAEAIBwAAL8BACAdAAC-AQAgPgAAvQEAID8AAMABACAJYgAAhgEAMGMAAIMBABBkAACGAQAwZQEAhwEAIWYBAIcBACFnAQCHAQAhaAEAhwEAIWkIAIgBACFqAgCJAQAhAwAAAAcAIAEAAIIBADAbAACDAQAgAwAAAAcAIAEAAAgAMAIAAAkAIAliAACGAQAwYwAAgwEAEGQAAIYBADBlAQCHAQAhZgEAhwEAIWcBAIcBACFoAQCHAQAhaQgAiAEAIWoCAIkBACEOCQAAiwEAIBwAAI8BACAdAACPAQAgawEAAAABbAEAAAAEbQEAAAAEbgEAAAABbwEAAAABcAEAAAABcQEAAAABcgEAjgEAIXMBAAAAAXQBAAAAAXUBAAAAAQ0JAACLAQAgHAAAjAEAIB0AAIwBACA-AACMAQAgPwAAjAEAIGsIAAAAAWwIAAAABG0IAAAABG4IAAAAAW8IAAAAAXAIAAAAAXEIAAAAAXIIAI0BACENCQAAiwEAIBwAAIsBACAdAACLAQAgPgAAjAEAID8AAIsBACBrAgAAAAFsAgAAAARtAgAAAARuAgAAAAFvAgAAAAFwAgAAAAFxAgAAAAFyAgCKAQAhDQkAAIsBACAcAACLAQAgHQAAiwEAID4AAIwBACA_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-QACwAQAhf0AAsAEAIQRrAAAAegJsAAAAeghtAAAAeghyAACZAXoiDggAAKkBACBiAACuAQAwYwAAFQAQZAAArgEAMGUBAKUBACFoAQClAQAhfkAAsAEAIY4BAQClAQAhjwEBAKUBACGRAQAArwGRASKSAQAAnAEAIJMBAACcAQAglAEAABUAIJUBAAAVACADiwEAAAcAIIwBAAAHACCNAQAABwAgAAAAAAABmQEBAAAAAQWZAQgAAAABoAEIAAAAAaEBCAAAAAGiAQgAAAABowEIAAAAAQWZAQIAAAABoAECAAAAAaEBAgAAAAGiAQIAAAABowECAAAAAQUWAAC3AgAgFwAAugIAIJYBAAC4AgAglwEAALkCACCcAQAABQAgAxYAALcCACCWAQAAuAIAIJwBAAAFACAAAAAAAAGZAQAAAHoCAZkBIAAAAAEBmQFAAAAAAQUWAACuAgAgFwAAtQIAIJYBAACvAgAglwEAALQCACCcAQAAAQAgCxYAANEBADAXAADWAQAwlgEAANIBADCXAQAA0wEAMJgBAADUAQAgmQEAANUBADCaAQAA1QEAMJsBAADVAQAwnAEAANUBADCdAQAA1wEAMJ4BAADYAQAwBRYAAKwCACAXAACyAgAglgEAAK0CACCXAQAAsQIAIJwBAAArACAFZQEAAAABZwEAAAABaAEAAAABaQgAAAABagIAAAABAgAAAAkAIBYAANwBACADAAAACQAgFgAA3AEAIBcAANsBACABDwAAsAIAMAoEAAC3AQAgYgAAtQEAMGMAAAcAEGQAALUBADBlAQAAAAFmAQClAQAhZwEApQEAIWgBAKUBACFpCACzAQAhagIAtgEAIQIAAAAJACAPAADbAQAgAgAAANkBACAPAADaAQAgCWIAANgBADBjAADZAQAQZAAA2AEAMGUBAKUBACFmAQClAQAhZwEApQEAIWgBAKUBACFpCACzAQAhagIAtgEAIQliAADYAQAwYwAA2QEAEGQAANgBADBlAQClAQAhZgEApQEAIWcBAKUBACFoAQClAQAhaQgAswEAIWoCALYBACEFZQEAwQEAIWcBAMEBACFoAQDBAQAhaQgAwgEAIWoCAMMBACEFZQEAwQEAIWcBAMEBACFoAQDBAQAhaQgAwgEAIWoCAMMBACEFZQEAAAABZwEAAAABaAEAAAABaQgAAAABagIAAAABAxYAAK4CACCWAQAArwIAIJwBAAABACAEFgAA0QEAMJYBAADSAQAwmAEAANQBACCcAQAA1QEAMAMWAACsAgAglgEAAK0CACCcAQAAKwAgAAAAAAAAAZkBAQAAAAECmQEBAAAABJ8BAQAAAAUFFgAApwIAIBcAAKoCACCWAQAAqAIAIJcBAACpAgAgnAEAACsAIAGZAQEAAAAEAxYAAKcCACCWAQAAqAIAIJwBAAArACAAAAABmQEAAACKAQILFgAA_QEAMBcAAIICADCWAQAA_gEAMJcBAAD_AQAwmAEAAIACACCZAQAAgQIAMJoBAACBAgAwmwEAAIECADCcAQAAgQIAMJ0BAACDAgAwngEAAIQCADALFgAA8QEAMBcAAPYBADCWAQAA8gEAMJcBAADzAQAwmAEAAPQBACCZAQAA9QEAMJoBAAD1AQAwmwEAAPUBADCcAQAA9QEAMJ0BAAD3AQAwngEAAPgBADALAwAA3QEAIAUAAN4BACBlAQAAAAF2AQAAAAF4CAAAAAF6AAAAegJ7IAAAAAF8QAAAAAF9AQAAAAF-QAAAAAF_QAAAAAECAAAABQAgFgAA_AEAIAMAAAAFACAWAAD8AQAgFwAA-wEAIAEPAACmAgAwEAMAALoBACAFAAC7AQAgBgAAtAEAIGIAALgBADBjAAADABBkAAC4AQAwZQEAAAABdgEApQEAIXcBAKUBACF4CACzAQAhegAAuQF6InsgAKYBACF8QACwAQAhfQEAAAABfkAAsAEAIX9AALABACECAAAABQAgDwAA-wEAIAIAAAD5AQAgDwAA-gEAIA1iAAD4AQAwYwAA-QEAEGQAAPgBADBlAQClAQAhdgEApQEAIXcBAKUBACF4CACzAQAhegAAuQF6InsgAKYBACF8QACwAQAhfQEApQEAIX5AALABACF_QACwAQAhDWIAAPgBADBjAAD5AQAQZAAA-AEAMGUBAKUBACF2AQClAQAhdwEApQEAIXgIALMBACF6AAC5AXoieyAApgEAIXxAALABACF9AQClAQAhfkAAsAEAIX9AALABACEJZQEAwQEAIXYBAMEBACF4CADCAQAhegAAywF6InsgAMwBACF8QADNAQAhfQEAwQEAIX5AAM0BACF_QADNAQAhCwMAAM4BACAFAADPAQAgZQEAwQEAIXYBAMEBACF4CADCAQAhegAAywF6InsgAMwBACF8QADNAQAhfQEAwQEAIX5AAM0BACF_QADNAQAhCwMAAN0BACAFAADeAQAgZQEAAAABdgEAAAABeAgAAAABegAAAHoCeyAAAAABfEAAAAABfQEAAAABfkAAAAABf0AAAAABCGUBAAAAAWgBAAAAAWkIAAAAAYABAQAAAAGBAQEAAAABggEgAAAAAYMBAADpAQAghAEBAAAAAQIAAAANACAWAACIAgAgAwAAAA0AIBYAAIgCACAXAACHAgAgAQ8AAKUCADANBgAAtAEAIGIAALEBADBjAAALABBkAACxAQAwZQEAAAABaAEApQEAIWkIALMBACF3AQClAQAhgAEBALIBACGBAQEApQEAIYIBIACmAQAhgwEAAJwBACCEAQEAsgEAIQIAAAANACAPAACHAgAgAgAAAIUCACAPAACGAgAgDGIAAIQCADBjAACFAgAQZAAAhAIAMGUBAKUBACFoAQClAQAhaQgAswEAIXcBAKUBACGAAQEAsgEAIYEBAQClAQAhggEgAKYBACGDAQAAnAEAIIQBAQCyAQAhDGIAAIQCADBjAACFAgAQZAAAhAIAMGUBAKUBACFoAQClAQAhaQgAswEAIXcBAKUBACGAAQEAsgEAIYEBAQClAQAhggEgAKYBACGDAQAAnAEAIIQBAQCyAQAhCGUBAMEBACFoAQDBAQAhaQgAwgEAIYABAQDmAQAhgQEBAMEBACGCASAAzAEAIYMBAADnAQAghAEBAOYBACEIZQEAwQEAIWgBAMEBACFpCADCAQAhgAEBAOYBACGBAQEAwQEAIYIBIADMAQAhgwEAAOcBACCEAQEA5gEAIQhlAQAAAAFoAQAAAAFpCAAAAAGAAQEAAAABgQEBAAAAAYIBIAAAAAGDAQAA6QEAIIQBAQAAAAEEFgAA_QEAMJYBAAD-AQAwmAEAAIACACCcAQAAgQIAMAQWAADxAQAwlgEAAPIBADCYAQAA9AEAIJwBAAD1AQAwAAAAAAABmQEAAACRAQICmQEBAAAABJ8BAQAAAAUCmQEBAAAABJ8BAQAAAAULFgAAlAIAMBcAAJgCADCWAQAAlQIAMJcBAACWAgAwmAEAAJcCACCZAQAA9QEAMJoBAAD1AQAwmwEAAPUBADCcAQAA9QEAMJ0BAACZAgAwngEAAPgBADALBQAA3gEAIAYAAN8BACBlAQAAAAF3AQAAAAF4CAAAAAF6AAAAegJ7IAAAAAF8QAAAAAF9AQAAAAF-QAAAAAF_QAAAAAECAAAABQAgFgAAnAIAIAMAAAAFACAWAACcAgAgFwAAmwIAIAEPAACkAgAwAgAAAAUAIA8AAJsCACACAAAA-QEAIA8AAJoCACAJZQEAwQEAIXcBAMEBACF4CADCAQAhegAAywF6InsgAMwBACF8QADNAQAhfQEAwQEAIX5AAM0BACF_QADNAQAhCwUAAM8BACAGAADQAQAgZQEAwQEAIXcBAMEBACF4CADCAQAhegAAywF6InsgAMwBACF8QADNAQAhfQEAwQEAIX5AAM0BACF_QADNAQAhCwUAAN4BACAGAADfAQAgZQEAAAABdwEAAAABeAgAAAABegAAAHoCeyAAAAABfEAAAAABfQEAAAABfkAAAAABf0AAAAABAZkBAQAAAAQBmQEBAAAABAQWAACUAgAwlgEAAJUCADCYAQAAlwIAIJwBAAD1AQAwAgcAAIsCACAIAACMAgAgAwMAAKICACAFAACjAgAgBgAAoAIAIAEIAACMAgAgAAllAQAAAAF3AQAAAAF4CAAAAAF6AAAAegJ7IAAAAAF8QAAAAAF9AQAAAAF-QAAAAAF_QAAAAAEIZQEAAAABaAEAAAABaQgAAAABgAEBAAAAAYEBAQAAAAGCASAAAAABgwEAAOkBACCEAQEAAAABCWUBAAAAAXYBAAAAAXgIAAAAAXoAAAB6AnsgAAAAAXxAAAAAAX0BAAAAAX5AAAAAAX9AAAAAAQUIAACKAgAgZQEAAAABaAEAAAABiAEgAAAAAYoBAAAAigECAgAAACsAIBYAAKcCACADAAAALgAgFgAApwIAIBcAAKsCACAHAAAALgAgCAAA8AEAIA8AAKsCACBlAQDBAQAhaAEAwQEAIYgBIADMAQAhigEAAO4BigEiBQgAAPABACBlAQDBAQAhaAEAwQEAIYgBIADMAQAhigEAAO4BigEiBQcAAIkCACBlAQAAAAFoAQAAAAGIASAAAAABigEAAACKAQICAAAAKwAgFgAArAIAIAhlAQAAAAFoAQAAAAF-QAAAAAGOAQEAAAABjwEBAAAAAZEBAAAAkQECkgEAAJ0CACCTAQAAngIAIAIAAAABACAWAACuAgAgBWUBAAAAAWcBAAAAAWgBAAAAAWkIAAAAAWoCAAAAAQMAAAAuACAWAACsAgAgFwAAswIAIAcAAAAuACAHAADvAQAgDwAAswIAIGUBAMEBACFoAQDBAQAhiAEgAMwBACGKAQAA7gGKASIFBwAA7wEAIGUBAMEBACFoAQDBAQAhiAEgAMwBACGKAQAA7gGKASIDAAAAFQAgFgAArgIAIBcAALYCACAKAAAAFQAgDwAAtgIAIGUBAMEBACFoAQDBAQAhfkAAzQEAIY4BAQDBAQAhjwEBAMEBACGRAQAAkAKRASKSAQAAkQIAIJMBAACSAgAgCGUBAMEBACFoAQDBAQAhfkAAzQEAIY4BAQDBAQAhjwEBAMEBACGRAQAAkAKRASKSAQAAkQIAIJMBAACSAgAgDAMAAN0BACAGAADfAQAgZQEAAAABdgEAAAABdwEAAAABeAgAAAABegAAAHoCeyAAAAABfEAAAAABfQEAAAABfkAAAAABf0AAAAABAgAAAAUAIBYAALcCACADAAAAAwAgFgAAtwIAIBcAALsCACAOAAAAAwAgAwAAzgEAIAYAANABACAPAAC7AgAgZQEAwQEAIXYBAMEBACF3AQDBAQAheAgAwgEAIXoAAMsBeiJ7IADMAQAhfEAAzQEAIX0BAMEBACF-QADNAQAhf0AAzQEAIQwDAADOAQAgBgAA0AEAIGUBAMEBACF2AQDBAQAhdwEAwQEAIXgIAMIBACF6AADLAXoieyAAzAEAIXxAAM0BACF9AQDBAQAhfkAAzQEAIX9AAM0BACECCAYCCQAIBAMAAQUKAwYABAkABwEEAAIDBw4FCA8CCQAGAQYABAIHEAAIEQABBRIAAQgTAAAAAAMJAA0cAA4dAA8AAAADCQANHAAOHQAPAAADCQAUHAAVHQAWAAAAAwkAFBwAFR0AFgEGAAQBBgAEBQkAGxwAHh0AHz4AHD8AHQAAAAAABQkAGxwAHh0AHz4AHD8AHQIDAAEGAAQCAwABBgAEBQkAJBwAJx0AKD4AJT8AJgAAAAAABQkAJBwAJx0AKD4AJT8AJgEEAAIBBAACBQkALRwAMB0AMT4ALj8ALwAAAAAABQkALRwAMB0AMT4ALj8ALwoCAQsUAQwXAQ0YAQ4ZARAbAREdCRIeChMgARQiCRUjCxgkARklARomCR4pDB8qECAsBCEtBCIwBCMxBCQyBCU0BCY2CSc3ESg5BCk7CSo8Eis9BCw-BC0_CS5CEy9DFzBEBTFFBTJGBTNHBTRIBTVKBTZMCTdNGDhPBTlRCTpSGTtTBTxUBT1VCUBYGkFZIEJaAkNbAkRcAkVdAkZeAkdgAkhiCUljIUplAktnCUxoIk1pAk5qAk9rCVBuI1FvKVJwA1NxA1RyA1VzA1Z0A1d2A1h4CVl5Klp7A1t9CVx-K11_A16AAQNfgQEJYIQBLGGFATI"
+}
 
+async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
+  const { Buffer } = await import('node:buffer')
+  const wasmArray = Buffer.from(wasmBase64, 'base64')
+  return new WebAssembly.Module(wasmArray)
+}
+
+config.compilerWasm = {
+  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.mjs"),
+
+  getQueryCompilerWasmModule: async () => {
+    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.mjs")
+    return await decodeBase64AsWasm(wasm)
+  },
+
+  importName: "./query_compiler_fast_bg.js"
+}
 
 
 
@@ -84,12 +67,14 @@ export interface PrismaClientConstructor {
    * Type-safe database client for TypeScript
    * @example
    * ```
-   * const prisma = new PrismaClient()
+   * const prisma = new PrismaClient({
+   *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+   * })
    * // Fetch zero or more Users
    * const users = await prisma.user.findMany()
    * ```
    * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+   * Read more in our [docs](https://pris.ly/d/client).
    */
 
   new <
@@ -97,7 +82,7 @@ export interface PrismaClientConstructor {
     LogOpts extends LogOptions<Options> = LogOptions<Options>,
     OmitOpts extends Prisma.PrismaClientOptions['omit'] = Options extends { omit: infer U } ? U : Prisma.PrismaClientOptions['omit'],
     ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
-  >(options?: Prisma.Subset<Options, Prisma.PrismaClientOptions> ): PrismaClient<LogOpts, OmitOpts, ExtArgs>
+  >(options: Prisma.Subset<Options, Prisma.PrismaClientOptions> ): PrismaClient<LogOpts, OmitOpts, ExtArgs>
 }
 
 /**
@@ -106,17 +91,19 @@ export interface PrismaClientConstructor {
  * Type-safe database client for TypeScript
  * @example
  * ```
- * const prisma = new PrismaClient()
+ * const prisma = new PrismaClient({
+ *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+ * })
  * // Fetch zero or more Users
  * const users = await prisma.user.findMany()
  * ```
  * 
- * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+ * Read more in our [docs](https://pris.ly/d/client).
  */
 
 export interface PrismaClient<
   in LogOpts extends Prisma.LogLevel = never,
-  in out OmitOpts extends Prisma.PrismaClientOptions['omit'] = Prisma.PrismaClientOptions['omit'],
+  in out OmitOpts extends Prisma.PrismaClientOptions['omit'] = undefined,
   in out ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -134,6 +121,53 @@ export interface PrismaClient<
   $disconnect(): runtime.Types.Utils.JsPromise<void>;
 
 /**
+   * Executes a prepared raw query and returns the number of affected rows.
+   * @example
+   * ```
+   * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
+
+  /**
+   * Executes a raw query and returns the number of affected rows.
+   * Susceptible to SQL injections, see documentation.
+   * @example
+   * ```
+   * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
+
+  /**
+   * Performs a prepared raw query and returns the `SELECT` data.
+   * @example
+   * ```
+   * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
+
+  /**
+   * Performs a raw query and returns the `SELECT` data.
+   * Susceptible to SQL injections, see documentation.
+   * @example
+   * ```
+   * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
+
+
+  /**
    * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
    * @example
    * ```
@@ -144,26 +178,11 @@ export interface PrismaClient<
    * ])
    * ```
    * 
-   * Read more in our [docs](https://www.prisma.io/docs/concepts/components/prisma-client/transactions).
+   * Read more in our [docs](https://www.prisma.io/docs/orm/prisma-client/queries/transactions).
    */
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P]): runtime.Types.Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): runtime.Types.Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
-  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => runtime.Types.Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number }): runtime.Types.Utils.JsPromise<R>
-
-  /**
-   * Executes a raw MongoDB command and returns the result of it.
-   * @example
-   * ```
-   * const user = await prisma.$runCommandRaw({
-   *   aggregate: 'User',
-   *   pipeline: [{ $match: { name: 'Bob' } }, { $project: { email: true, _id: false } }],
-   *   explain: false,
-   * })
-   * ```
-   * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $runCommandRaw(command: Prisma.InputJsonObject): Prisma.PrismaPromise<Prisma.JsonObject>
+  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => runtime.Types.Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): runtime.Types.Utils.JsPromise<R>
 
   $extends: runtime.Types.Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<OmitOpts>, ExtArgs, runtime.Types.Utils.Call<Prisma.TypeMapCb<OmitOpts>, {
     extArgs: ExtArgs
@@ -208,9 +227,18 @@ export interface PrismaClient<
     * ```
     */
   get order(): Prisma.OrderDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.orderItem`: Exposes CRUD operations for the **OrderItem** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OrderItems
+    * const orderItems = await prisma.orderItem.findMany()
+    * ```
+    */
+  get orderItem(): Prisma.OrderItemDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
-export function getPrismaClientClass(dirname: string): PrismaClientConstructor {
-  config.dirname = dirname
+export function getPrismaClientClass(): PrismaClientConstructor {
   return runtime.getPrismaClient(config) as unknown as PrismaClientConstructor
 }

@@ -8,9 +8,9 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/OrderItem.ts'
 export type * from './models/User.ts'
 export type * from './models/Cafeteria.ts'
 export type * from './models/MenuItem.ts'
 export type * from './models/Order.ts'
+export type * from './models/OrderItem.ts'
 export type * from './commonInputTypes.ts'

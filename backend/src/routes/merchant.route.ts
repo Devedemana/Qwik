@@ -7,7 +7,7 @@ import {
   OrderIdParamSchema,
   AdvanceOrderBodySchema,
 } from "../schema/merchant.schema.ts";
-import { validateBody, validateParams } from "middlewares/validate.ts";
+import { validateBody, validateParams } from "middlewares/validate.middleware.ts";
 
 const merchantRouter = Router();
 

@@ -7,6 +7,8 @@ Thumbs.db
 *.tmp
 .env
 .env.test
+./backend/.env
+.backend/.env.test
 
 # --- Backend (Node.js / TypeScript) ---
 backend/node_modules/
