@@ -1,9 +1,8 @@
 import { prisma } from "../../src/lib/prisma.ts";
 import { v4 as uuidv4 } from 'uuid';
-import { CapacityStatus, OrderStatus, Role } from "../../prisma/generated/prisma/client.d.ts";
+import { CapacityStatus, OrderStatus, Role } from "../../prisma/generated/prisma/enums.ts";
 
 export const TestHelpers = {
-
   async clearDatabase() {
     // Delete order items first, then orders, then the entities they depend on
     await prisma.orderItem.deleteMany();

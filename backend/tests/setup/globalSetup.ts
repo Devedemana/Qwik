@@ -22,10 +22,7 @@ export async function setup() {
 
 export async function teardown() {
   try {
-    execSync('npx prisma db reset --force', { stdio: 'inherit' }); 
-    // stop docker compose 
-    console.log('--- Cleaning Up Test Environment ---');
-    // 2. Disconnect the client
+    execSync('npx prisma db push --force-reset', { stdio: 'inherit' }); 
     await prisma.$disconnect();
     console.log('--- Teardown Complete ---');
     process.exit(0); 

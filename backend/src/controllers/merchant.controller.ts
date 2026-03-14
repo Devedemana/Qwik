@@ -6,11 +6,16 @@ export const MerchantController = {
   async updateStatus(req: Request, res: Response) {
     try {
       const { cafeteriaId, status } = req.body;
+      console.log('cafetaria: ', cafeteriaId)
       const result = await MerchantService.updateCafeteriaStatus(cafeteriaId, status);
       
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      return res.status(500).json({ success: false, error: 'Status update failed' });
+      return res.status(500).json({
+        success: false,
+        error: 'Status update failed',
+        detail: error
+      });
     }
   },
 
