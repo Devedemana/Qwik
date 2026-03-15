@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------- SCHEMAS --------------------------
+
+model User {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  name             String
+  password         String
+  role             Role     @default(CUSTOMER)
+  dietaryLifestyle String[] // Postgres supports native scalar lists (arrays)
+  allergies        String[]
+  orders           Order[]
+  createdAt        DateTime @default(now())
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+model Cafeteria {
+  id             String         @id @default(uuid())
+  name           String         @unique
+  isOpen         Boolean        @default(true)
+  capacityStatus CapacityStatus @default(GREEN)
+  menuItems      MenuItem[]
+  orders         Order[]
+}
+
+enum CapacityStatus {
+  GREEN
+  YELLOW
+  RED
+}
+
+model MenuItem {
+  id           String    @id @default(uuid())
+  cafeteriaId  String
+  name         String
+  description  String?
+  price        Float
+  category     String
+  isAvailable  Boolean   @default(true)
+  allergenTags String[]
+  imageUrl     String?
+
+  cafeteria    Cafeteria @relation(fields: [cafeteriaId], references: [id])
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  cafeteriaId  String
+  totalAmount  Float
+  status       OrderStatus @default(PENDING_PAYMENT)
+  isPaid       Boolean     @default(false)
+  pickupWindow DateTime
+  qrCodeSecret String      @unique
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  items        OrderItem[]
+  cafeteria    Cafeteria   @relation(fields: [cafeteriaId], references: [id])
+}
+
+// In Postgres, OrderItem must be a model to support relations
+model OrderItem {
+  id         String @id @default(uuid())
+  orderId    String
+  menuItemId String
+  name       String
+  price      Float
+  quantity   Int
+
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  RECEIVED
+  PREPPING
+  READY
+  COMPLETED
+  CANCELLED
+}

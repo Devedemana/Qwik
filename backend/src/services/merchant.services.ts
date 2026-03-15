@@ -1,19 +1,20 @@
-import { prisma } from "../lib/index.ts";
 import { emitUpdate } from "lib/socket.ts";
-import { OrderStatus } from "../../prisma/generated/prisma/enums.ts";
+import { OrderStatus, CapacityStatus } from "../../prisma/generated/prisma/enums.ts";
+import { prisma } from '../lib/prisma.ts'
 
 export const MerchantService = {
   async updateCafeteriaStatus(cafeteriaId: string, status: string) {
-    const updatedCafeteria = await prisma.cafetaria.update({
-      where: { id: cafeteriaId },
-      data: { capacityStatus: status },
-    });
-    emitUpdate(`cafeteria:${cafeteriaId}`, "status_changed", {
-      cafeteriaId,
-      status,
-    });
+      const updatedCafeteria = await prisma.cafeteria.update({
+        where: { id: cafeteriaId },
+        data: { capacityStatus: status as unknown as CapacityStatus },
+      });
+      // emit changes to all cafetaria users 
+      emitUpdate(`cafeteria:${cafeteriaId}`, "status_changed", {
+        cafeteriaId,
+        status,
+      });
 
-    return updatedCafeteria;
+      return updatedCafeteria;
   },
 
   async updateItemAvailability(id: string, isAvailable: boolean) {
@@ -36,7 +37,7 @@ export const MerchantService = {
     return await prisma.order.findMany({
       where: {
         cafeteriaId,
-        status: { in: ["PAID", "PREPPING", "READY"] },
+        status: { in: ["PREPPING", "PREPPING", "READY"] },
       },
       orderBy: { createdAt: "asc" },
     });

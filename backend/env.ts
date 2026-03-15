@@ -18,7 +18,7 @@ export const envSchema = z.object({
   APP_STAGE: z.enum(['production', 'dev', 'test']).default('dev'),
   PORT: z.coerce.number().positive().default(3000),
   // Prisma MongoDB URL validation
-  DATABASE_URL: z.string().url().regex(/^postgres:\/\//, "DATABASE_URL must be a valid Postgres connection string"),
+  DATABASE_URL: z.string().url().regex(/^postgresql:\/\//, "DATABASE_URL must be a valid Postgres connection string"),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_ROUNDS: z.coerce.number().min(12).default(12),

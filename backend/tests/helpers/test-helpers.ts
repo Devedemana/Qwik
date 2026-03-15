@@ -39,8 +39,8 @@ export const TestHelpers = {
   async createMenuItem(cafeteriaId: string, overrides = {}) {
     return await prisma.menuItem.create({
       data: {
-        name: "Jollof Rice",
-        price: 15.0,
+        name: "Jollof Rice & Chicken",
+        price: 30.0,
         category: "Lunch",
         isAvailable: true,
         cafeteriaId,

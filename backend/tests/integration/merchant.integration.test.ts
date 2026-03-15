@@ -4,7 +4,6 @@ import { app } from "app.ts";
 import { TestHelpers } from "../helpers/test-helpers.ts";
 
 describe("------- Merchant Endpoint Tests ---------", () => {
-
   describe("PATCH /api/merchant/status", () => {
     it("should update cafeteria queue status and return 200", async () => {
       // Setup using helper
@@ -16,9 +15,9 @@ describe("------- Merchant Endpoint Tests ---------", () => {
           cafeteriaId: cafe.id,
           status: "YELLOW",
         });
-       console.log("RESPONSE: ", response.body)
-      // expect(response.status).toBe(200);
-      // expect(response.body.data.capacityStatus).toBe("YELLOW");
+      
+      expect(response.status).toBe(200);
+      expect(response.body.data.capacityStatus).toBe("YELLOW");
     });
   });
 

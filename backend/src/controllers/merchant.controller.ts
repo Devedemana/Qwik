@@ -2,11 +2,10 @@ import { Request, Response } from 'express';
 import { MerchantService } from '../services/merchant.services.ts';
 
 export const MerchantController = {
-  // 1. PATCH /api/merchant/status
+  // PATCH /api/merchant/status
   async updateStatus(req: Request, res: Response) {
     try {
       const { cafeteriaId, status } = req.body;
-      console.log('cafetaria: ', cafeteriaId)
       const result = await MerchantService.updateCafeteriaStatus(cafeteriaId, status);
       
       return res.status(200).json({ success: true, data: result });
@@ -14,12 +13,12 @@ export const MerchantController = {
       return res.status(500).json({
         success: false,
         error: 'Status update failed',
-        detail: error
+        detail: error.message
       });
     }
   },
 
-  // 2. PUT /api/merchant/inventory
+  // PUT /api/merchant/inventory
   async toggleInventory(req: Request, res: Response) {
     try {
       const { itemId, isAvailable } = req.body;
@@ -31,7 +30,7 @@ export const MerchantController = {
     }
   },
 
-  // 3. GET /api/merchant/orders/:cafeteriaId
+  // GET /api/merchant/orders/:cafeteriaId
   async getQueue(req: Request, res: Response) {
     try {
       const { cafeteriaId } = req.params;
@@ -43,7 +42,7 @@ export const MerchantController = {
     }
   },
 
-  // 4. PATCH /api/merchant/orders/:id
+  // PATCH /api/merchant/orders/:id
   async advanceOrder(req: Request, res: Response) {
     try {
       const { id } = req.params;
