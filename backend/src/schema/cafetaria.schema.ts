@@ -19,3 +19,8 @@ export const menuItemSchema = z.object({
     category: z.enum(['Breakfast', 'Lunch', 'Drinks', 'Snacks']),
   })
 });
+
+export const CafeteriaAvailabilitySchema = z.object({
+  isOpne: z.boolean().default(true),
+  cafeteriaId: z.string()
+})

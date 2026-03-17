@@ -72,8 +72,21 @@ The "State Machine" that moves a single order through the kitchen process.
 
 ```
 
+### 5. Order Lifecycle Transitions
 
-* **Impact:** Changes the order status. If moved to `READY`, the student receives a real-time notification to come pick up their food.
+The "State Machine" that moves a single order through the kitchen process.
+
+* **Endpoint:** `PATCH /api/merchant/order/verify`
+* **Controller Method:** `verifyPickupOrder`
+* **Payload (Body):**
+```json
+{
+  "qrCodeSecret": "dfer00ddre0r0fe0rerkfoeo20",
+  "cafetariaId": "1od24050rkoeoro0r"
+}
+
+```
+* **Impact:** Verifies the supplied qrCodeSecret associated with an order and completes the order when the order status is `READY`, this emits real-time notification so customer.
 
 ---
 
@@ -85,5 +98,9 @@ The "State Machine" that moves a single order through the kitchen process.
 | **Toggle Food** | `PUT` | `/inventory` | `itemId`, `isAvailable` |
 | **View Orders** | `GET` | `/orders/:cafeteriaId` | `cafeteriaId` (URL) |
 | **Update Order** | `PATCH` | `/orders/:id` | `id` (URL), `status` (Body) |
+| **Verify Order Pickup**|`POST`|`/order/verify`| `qrCodeSecret`, `cafetariaId`|
+
 
 ---
+
+## (II)  

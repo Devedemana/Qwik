@@ -1,20 +1,23 @@
 import { emitUpdate } from "lib/socket.ts";
-import { OrderStatus, CapacityStatus } from "../../prisma/generated/prisma/enums.ts";
-import { prisma } from '../lib/prisma.ts'
+import {
+  OrderStatus,
+  CapacityStatus,
+} from "../../prisma/generated/prisma/enums.ts";
+import { prisma } from "../lib/prisma.ts";
 
 export const MerchantService = {
   async updateCafeteriaStatus(cafeteriaId: string, status: string) {
-      const updatedCafeteria = await prisma.cafeteria.update({
-        where: { id: cafeteriaId },
-        data: { capacityStatus: status as unknown as CapacityStatus },
-      });
-      // emit changes to all cafetaria users 
-      emitUpdate(`cafeteria:${cafeteriaId}`, "status_changed", {
-        cafeteriaId,
-        status,
-      });
+    const updatedCafeteria = await prisma.cafeteria.update({
+      where: { id: cafeteriaId },
+      data: { capacityStatus: status as unknown as CapacityStatus },
+    });
+    // emit changes to all cafetaria users
+    emitUpdate(`cafeteria:${cafeteriaId}`, "status_changed", {
+      cafeteriaId,
+      status,
+    });
 
-      return updatedCafeteria;
+    return updatedCafeteria;
   },
 
   async updateItemAvailability(id: string, isAvailable: boolean) {
@@ -44,33 +47,78 @@ export const MerchantService = {
   },
 
   // Order State Transitions
-  async updateOrderStatus(
-    orderId: string,
-    nextStatus:OrderStatus,
-  ) {
-    const currentOrder = await prisma.order.findUnique({ where: { id: orderId } });
+  async updateOrderStatus(orderId: string, nextStatus: OrderStatus) {
+    const currentOrder = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
     this.validateTransition(currentOrder?.status, nextStatus);
     const updated = await prisma.order.update({
       where: { id: orderId },
-      data: { status: nextStatus }
+      data: { status: nextStatus },
     });
 
-    emitUpdate(`order:${orderId}`, 'order_status_update', { status: nextStatus });
+    emitUpdate(`order:${orderId}`, "order_status_update", {
+      status: nextStatus,
+    });
     return updated;
   },
-  
+
+  async verifyOrderPickup(qrSecret: string, cafeteriaId: string) {
+    const order = await prisma.order.findUnique({
+      where: { qrCodeSecret: qrSecret },
+      include: {
+        items: true,
+        cafeteria: true
+      },
+    });
+    if (!order) {
+      throw new Error("Invalid QR Code: Order not found.");
+    }
+    if (order.cafeteriaId !== cafeteriaId) {
+      throw new Error(
+        "Wrong Cafeteria: This order belongs to " + order.cafeteria.name,
+      );
+    }
+    if (order.status !== "READY") {
+      throw new Error(`Order is not ready. Current status: ${order.status}`);
+    }
+    
+    // emit 
+    emitUpdate(`order:${order.id}`, "order-pickup-completed", {
+      items: order.items,
+      totalAmount: order.totalAmount
+    })
+    return await prisma.order.update({
+      where: { id: order.id },
+      data: { status: "COMPLETED" },
+    });
+  },
+
+  async toggleCafeteriaAvailability(cafeteriaId: string, isOpen: boolean) {
+    const updateCafeteria = await prisma.cafeteria.update({
+      where: { id: cafeteriaId },
+      data: {
+        isOpen: isOpen
+      }
+    });
+
+    emitUpdate(`cafetaria: ${cafeteriaId}`,"cafeteria-operation-updated", {
+      name: updateCafeteria.name,
+      status:  isOpen ? 'isOpenend' : 'isClosed'
+    })
+  },
 
   // 1. Pure Logic for Staff Discount
   calculateStaffPrice(price: number): number {
-    const DISCOUNT_RATE = 0.20; // 20%
+    const DISCOUNT_RATE = 0.2; // 20%s
     return price * (1 - DISCOUNT_RATE);
   },
 
   // 2. State Machine Validation
   validateTransition(current: string, next: string): void {
-    if (current === 'COMPLETED' && next === 'PREPPING') {
-      throw new Error('Cannot move a completed order back to prepping');
+    if (current === "COMPLETED" && next === "PREPPING") {
+      throw new Error("Cannot move a completed order back to prepping");
     }
     // Add other rules here as needed
-  }
+  },
 };

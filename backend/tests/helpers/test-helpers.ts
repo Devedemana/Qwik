@@ -78,4 +78,13 @@ export const TestHelpers = {
       },
     });
   },
+
+  async updateOrder(orderId: string, status: string, cafetariaId: string) {
+    await prisma.order.update({
+      where: { id: orderId, cafeteriaId: cafetariaId },
+      data: {
+        status: status as unknown as OrderStatus
+      }
+    })
+  }
 };

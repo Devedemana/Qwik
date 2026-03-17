@@ -1,13 +1,10 @@
 import { Router } from "express";
 import { MerchantController } from "../controllers/merchant.controller.ts";
-import {
-  MerchantStatusSchema,
-  InventoryUpdateSchema,
-  CafeteriaIdParamSchema,
-  OrderIdParamSchema,
-  AdvanceOrderBodySchema,
+import {MerchantStatusSchema,InventoryUpdateSchema,CafeteriaIdParamSchema,OrderIdParamSchema,AdvanceOrderBodySchema,
+VerifyPickupSchema,
 } from "../schema/merchant.schema.ts";
-import { validateBody, validateParams } from "middlewares/validate.middleware.ts";
+import { validateBody, validateParams} from "middlewares/validate.middleware.ts";
+import { CafeteriaAvailabilitySchema } from "schema/cafetaria.schema.ts";
 
 const merchantRouter = Router();
 
@@ -37,6 +34,13 @@ merchantRouter.patch(
   MerchantController.advanceOrder,
 );
 
+merchantRouter.post(
+  "/order/verify",
+  validateBody(VerifyPickupSchema),
+  MerchantController.verifyOrderPickup,
+);
+
+merchantRouter.patch("/toggle-gate", validateBody(CafeteriaAvailabilitySchema), MerchantController.toggleCafeteriaAvailability);
 
 
 export default merchantRouter;

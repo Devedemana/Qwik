@@ -5,7 +5,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet  from 'helmet';
 import { isTest } from '../env.ts';
-import { merchantRouter} from './routes/index.ts';
+import { merchantRouter } from './routes/index.ts';
+import { errorHandler } from 'middlewares/error.middleware.ts';
+import { notFoundError } from 'middlewares/error.middleware.ts';
 
 
 
@@ -13,7 +15,7 @@ const app = express()
 // global middlewares 
 app.use(helmet()); 
 app.use(morgan('combined', { skip: function(){  isTest()} }));
-app.use(cors({ origin: '*' })) // handle CORS : later we would configure it to only allow our app
+app.use(cors({ origin: '*' })) 
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); // allows express to to decipher all url endcodings to unders and decode params
 
@@ -32,12 +34,13 @@ app.use('/health', (req, res) => {
 
 
 // -------------------- ROUTES ----------------------------
-//Merchant router
 app.use('/api/merchant', merchantRouter) ; 
  
 
 
-
+// error handlers
+app.use(errorHandler);
+app.use(notFoundError);
 
 export { app, httpServer as server }; 
 export default app; 

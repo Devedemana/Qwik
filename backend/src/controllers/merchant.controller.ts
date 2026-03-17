@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
 import { MerchantService } from '../services/merchant.services.ts';
+import { verify } from 'node:crypto';
+import { success } from 'zod';
+import { error } from 'node:console';
+import { RecordWithTtl } from 'node:dns';
 
 export const MerchantController = {
   // PATCH /api/merchant/status
@@ -52,6 +56,35 @@ export const MerchantController = {
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, error: 'Order update failed' });
+    }
+  },
+
+  // POST / ap/merchant/order/verify
+  async verifyOrderPickup(req: Request, res: Response) {
+    try {
+      const { qrCodeSecret, cafeteriaId } = req.body; 
+      const result = await MerchantService.verifyOrderPickup(qrCodeSecret, cafeteriaId);
+      return res.status(200).json({ 
+        success: true,
+        data: result,
+        message:'Order completed successfully '
+      })
+      
+    } catch (err) {
+      return res.status(500).json({ success: false, error:err.message});
+
+    }
+  },
+
+  async toggleCafeteriaAvailability(req: Request, res: Response) {
+    try {
+      const { isOpen, cafeteriaId } = req.body; 
+      const result = await MerchantService.toggleCafeteriaAvailability(cafeteriaId, isOpen); 
+      return res.status(200).json({ success: true, data: result });
+
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message});
+
     }
   }
 };

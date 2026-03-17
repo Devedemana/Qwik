@@ -4,8 +4,8 @@ import { CapacityStatus } from '../../prisma/generated/prisma/enums.ts';
 
 // Validating the QR scan at the counter
 export const VerifyPickupSchema = z.object({
-    qrToken: z.string().min(32, "Invalid QR Token"), // Token generated on order payment
-    cafeteriaId: z.string().regex(/^[0-9a-fA-F]{24}$/)
+    qrCodeSecret: z.string().min(32, "Invalid QR Token"), 
+    cafeteriaId: z.string()
 });
 
 // For moving orders through the kitchen cycle
