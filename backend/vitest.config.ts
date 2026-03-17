@@ -17,7 +17,7 @@ export default defineConfig({
         clearMocks: true,
         restoreMocks: true,
         // Ensure tests run sequentially to avoid database conflicts
-        pool: 'threads',
+        pool:'threads',
         coverage: {
             provider: "v8",
             enabled:true

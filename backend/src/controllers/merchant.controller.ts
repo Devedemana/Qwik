@@ -1,9 +1,5 @@
 import { Request, Response } from 'express';
 import { MerchantService } from '../services/merchant.services.ts';
-import { verify } from 'node:crypto';
-import { success } from 'zod';
-import { error } from 'node:console';
-import { RecordWithTtl } from 'node:dns';
 
 export const MerchantController = {
   // PATCH /api/merchant/status

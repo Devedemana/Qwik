@@ -76,6 +76,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  cardId: 'cardId',
   email: 'email',
   name: 'name',
   password: 'password',
@@ -90,6 +91,7 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const CafeteriaScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   name: 'name',
   isOpen: 'isOpen',
   capacityStatus: 'capacityStatus'

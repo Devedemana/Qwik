@@ -20,12 +20,23 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
 
+export type UserAvgAggregateOutputType = {
+  cardId: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  cardId: number | null
+}
+
 export type UserMinAggregateOutputType = {
   id: string | null
+  cardId: number | null
   email: string | null
   name: string | null
   password: string | null
@@ -35,6 +46,7 @@ export type UserMinAggregateOutputType = {
 
 export type UserMaxAggregateOutputType = {
   id: string | null
+  cardId: number | null
   email: string | null
   name: string | null
   password: string | null
@@ -44,6 +56,7 @@ export type UserMaxAggregateOutputType = {
 
 export type UserCountAggregateOutputType = {
   id: number
+  cardId: number
   email: number
   name: number
   password: number
@@ -55,8 +68,17 @@ export type UserCountAggregateOutputType = {
 }
 
 
+export type UserAvgAggregateInputType = {
+  cardId?: true
+}
+
+export type UserSumAggregateInputType = {
+  cardId?: true
+}
+
 export type UserMinAggregateInputType = {
   id?: true
+  cardId?: true
   email?: true
   name?: true
   password?: true
@@ -66,6 +88,7 @@ export type UserMinAggregateInputType = {
 
 export type UserMaxAggregateInputType = {
   id?: true
+  cardId?: true
   email?: true
   name?: true
   password?: true
@@ -75,6 +98,7 @@ export type UserMaxAggregateInputType = {
 
 export type UserCountAggregateInputType = {
   id?: true
+  cardId?: true
   email?: true
   name?: true
   password?: true
@@ -123,6 +147,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -153,12 +189,15 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
 
 export type UserGroupByOutputType = {
   id: string
+  cardId: number | null
   email: string
   name: string
   password: string
@@ -167,6 +206,8 @@ export type UserGroupByOutputType = {
   allergies: string[]
   createdAt: Date
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -191,6 +232,7 @@ export type UserWhereInput = {
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
+  cardId?: Prisma.IntNullableFilter<"User"> | number | null
   email?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
@@ -199,10 +241,12 @@ export type UserWhereInput = {
   allergies?: Prisma.StringNullableListFilter<"User">
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   orders?: Prisma.OrderListRelationFilter
+  workAtCafeteria?: Prisma.CafeteriaListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  cardId?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -211,6 +255,7 @@ export type UserOrderByWithRelationInput = {
   allergies?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  workAtCafeteria?: Prisma.CafeteriaOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -219,6 +264,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
+  cardId?: Prisma.IntNullableFilter<"User"> | number | null
   name?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
@@ -226,10 +272,12 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   allergies?: Prisma.StringNullableListFilter<"User">
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   orders?: Prisma.OrderListRelationFilter
+  workAtCafeteria?: Prisma.CafeteriaListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  cardId?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -238,8 +286,10 @@ export type UserOrderByWithAggregationInput = {
   allergies?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -247,6 +297,7 @@ export type UserScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
+  cardId?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
@@ -258,6 +309,7 @@ export type UserScalarWhereWithAggregatesInput = {
 
 export type UserCreateInput = {
   id?: string
+  cardId?: number | null
   email: string
   name: string
   password: string
@@ -266,10 +318,12 @@ export type UserCreateInput = {
   allergies?: Prisma.UserCreateallergiesInput | string[]
   createdAt?: Date | string
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  workAtCafeteria?: Prisma.CafeteriaCreateNestedManyWithoutWorkersInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
+  cardId?: number | null
   email: string
   name: string
   password: string
@@ -278,10 +332,12 @@ export type UserUncheckedCreateInput = {
   allergies?: Prisma.UserCreateallergiesInput | string[]
   createdAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  workAtCafeteria?: Prisma.CafeteriaUncheckedCreateNestedManyWithoutWorkersInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
@@ -290,10 +346,12 @@ export type UserUpdateInput = {
   allergies?: Prisma.UserUpdateallergiesInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  workAtCafeteria?: Prisma.CafeteriaUpdateManyWithoutWorkersNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
@@ -302,10 +360,12 @@ export type UserUncheckedUpdateInput = {
   allergies?: Prisma.UserUpdateallergiesInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  workAtCafeteria?: Prisma.CafeteriaUncheckedUpdateManyWithoutWorkersNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: string
+  cardId?: number | null
   email: string
   name: string
   password: string
@@ -317,6 +377,7 @@ export type UserCreateManyInput = {
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
@@ -328,6 +389,7 @@ export type UserUpdateManyMutationInput = {
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
@@ -347,6 +409,7 @@ export type StringNullableListFilter<$PrismaModel = never> = {
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  cardId?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -356,8 +419,13 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
 }
 
+export type UserAvgOrderByAggregateInput = {
+  cardId?: Prisma.SortOrder
+}
+
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  cardId?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -367,11 +435,26 @@ export type UserMaxOrderByAggregateInput = {
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  cardId?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  cardId?: Prisma.SortOrder
+}
+
+export type UserListRelationFilter = {
+  every?: Prisma.UserWhereInput
+  some?: Prisma.UserWhereInput
+  none?: Prisma.UserWhereInput
+}
+
+export type UserOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -389,6 +472,14 @@ export type UserCreateallergiesInput = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type EnumRoleFieldUpdateOperationsInput = {
@@ -409,6 +500,44 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type UserCreateNestedManyWithoutWorkAtCafeteriaInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput> | Prisma.UserCreateWithoutWorkAtCafeteriaInput[] | Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput | Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutWorkAtCafeteriaInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput> | Prisma.UserCreateWithoutWorkAtCafeteriaInput[] | Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput | Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUpdateManyWithoutWorkAtCafeteriaNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput> | Prisma.UserCreateWithoutWorkAtCafeteriaInput[] | Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput | Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutWorkAtCafeteriaInput | Prisma.UserUpsertWithWhereUniqueWithoutWorkAtCafeteriaInput[]
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutWorkAtCafeteriaInput | Prisma.UserUpdateWithWhereUniqueWithoutWorkAtCafeteriaInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutWorkAtCafeteriaInput | Prisma.UserUpdateManyWithWhereWithoutWorkAtCafeteriaInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutWorkAtCafeteriaNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput> | Prisma.UserCreateWithoutWorkAtCafeteriaInput[] | Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput | Prisma.UserCreateOrConnectWithoutWorkAtCafeteriaInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutWorkAtCafeteriaInput | Prisma.UserUpsertWithWhereUniqueWithoutWorkAtCafeteriaInput[]
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutWorkAtCafeteriaInput | Prisma.UserUpdateWithWhereUniqueWithoutWorkAtCafeteriaInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutWorkAtCafeteriaInput | Prisma.UserUpdateManyWithWhereWithoutWorkAtCafeteriaInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
 export type UserCreateNestedOneWithoutOrdersInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrdersInput
@@ -423,8 +552,9 @@ export type UserUpdateOneRequiredWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrdersInput, Prisma.UserUpdateWithoutOrdersInput>, Prisma.UserUncheckedUpdateWithoutOrdersInput>
 }
 
-export type UserCreateWithoutOrdersInput = {
+export type UserCreateWithoutWorkAtCafeteriaInput = {
   id?: string
+  cardId?: number | null
   email: string
   name: string
   password: string
@@ -432,10 +562,74 @@ export type UserCreateWithoutOrdersInput = {
   dietaryLifestyle?: Prisma.UserCreatedietaryLifestyleInput | string[]
   allergies?: Prisma.UserCreateallergiesInput | string[]
   createdAt?: Date | string
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutWorkAtCafeteriaInput = {
+  id?: string
+  cardId?: number | null
+  email: string
+  name: string
+  password: string
+  role?: $Enums.Role
+  dietaryLifestyle?: Prisma.UserCreatedietaryLifestyleInput | string[]
+  allergies?: Prisma.UserCreateallergiesInput | string[]
+  createdAt?: Date | string
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutWorkAtCafeteriaInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput>
+}
+
+export type UserUpsertWithWhereUniqueWithoutWorkAtCafeteriaInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedUpdateWithoutWorkAtCafeteriaInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedCreateWithoutWorkAtCafeteriaInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutWorkAtCafeteriaInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWorkAtCafeteriaInput, Prisma.UserUncheckedUpdateWithoutWorkAtCafeteriaInput>
+}
+
+export type UserUpdateManyWithWhereWithoutWorkAtCafeteriaInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutWorkAtCafeteriaInput>
+}
+
+export type UserScalarWhereInput = {
+  AND?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+  OR?: Prisma.UserScalarWhereInput[]
+  NOT?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+  id?: Prisma.StringFilter<"User"> | string
+  cardId?: Prisma.IntNullableFilter<"User"> | number | null
+  email?: Prisma.StringFilter<"User"> | string
+  name?: Prisma.StringFilter<"User"> | string
+  password?: Prisma.StringFilter<"User"> | string
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  dietaryLifestyle?: Prisma.StringNullableListFilter<"User">
+  allergies?: Prisma.StringNullableListFilter<"User">
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+}
+
+export type UserCreateWithoutOrdersInput = {
+  id?: string
+  cardId?: number | null
+  email: string
+  name: string
+  password: string
+  role?: $Enums.Role
+  dietaryLifestyle?: Prisma.UserCreatedietaryLifestyleInput | string[]
+  allergies?: Prisma.UserCreateallergiesInput | string[]
+  createdAt?: Date | string
+  workAtCafeteria?: Prisma.CafeteriaCreateNestedManyWithoutWorkersInput
 }
 
 export type UserUncheckedCreateWithoutOrdersInput = {
   id?: string
+  cardId?: number | null
   email: string
   name: string
   password: string
@@ -443,6 +637,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   dietaryLifestyle?: Prisma.UserCreatedietaryLifestyleInput | string[]
   allergies?: Prisma.UserCreateallergiesInput | string[]
   createdAt?: Date | string
+  workAtCafeteria?: Prisma.CafeteriaUncheckedCreateNestedManyWithoutWorkersInput
 }
 
 export type UserCreateOrConnectWithoutOrdersInput = {
@@ -463,6 +658,7 @@ export type UserUpdateToOneWithWhereWithoutOrdersInput = {
 
 export type UserUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
@@ -470,10 +666,51 @@ export type UserUpdateWithoutOrdersInput = {
   dietaryLifestyle?: Prisma.UserUpdatedietaryLifestyleInput | string[]
   allergies?: Prisma.UserUpdateallergiesInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workAtCafeteria?: Prisma.CafeteriaUpdateManyWithoutWorkersNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  dietaryLifestyle?: Prisma.UserUpdatedietaryLifestyleInput | string[]
+  allergies?: Prisma.UserUpdateallergiesInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workAtCafeteria?: Prisma.CafeteriaUncheckedUpdateManyWithoutWorkersNestedInput
+}
+
+export type UserUpdateWithoutWorkAtCafeteriaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  dietaryLifestyle?: Prisma.UserUpdatedietaryLifestyleInput | string[]
+  allergies?: Prisma.UserUpdateallergiesInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWorkAtCafeteriaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  dietaryLifestyle?: Prisma.UserUpdatedietaryLifestyleInput | string[]
+  allergies?: Prisma.UserUpdateallergiesInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutWorkAtCafeteriaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cardId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
@@ -490,10 +727,12 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
 
 export type UserCountOutputType = {
   orders: number
+  workAtCafeteria: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | UserCountOutputTypeCountOrdersArgs
+  workAtCafeteria?: boolean | UserCountOutputTypeCountWorkAtCafeteriaArgs
 }
 
 /**
@@ -513,9 +752,17 @@ export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.OrderWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWorkAtCafeteriaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CafeteriaWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  cardId?: boolean
   email?: boolean
   name?: boolean
   password?: boolean
@@ -524,11 +771,13 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   allergies?: boolean
   createdAt?: boolean
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
+  workAtCafeteria?: boolean | Prisma.User$workAtCafeteriaArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  cardId?: boolean
   email?: boolean
   name?: boolean
   password?: boolean
@@ -540,6 +789,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  cardId?: boolean
   email?: boolean
   name?: boolean
   password?: boolean
@@ -551,6 +801,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 
 export type UserSelectScalar = {
   id?: boolean
+  cardId?: boolean
   email?: boolean
   name?: boolean
   password?: boolean
@@ -560,9 +811,10 @@ export type UserSelectScalar = {
   createdAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "role" | "dietaryLifestyle" | "allergies" | "createdAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cardId" | "email" | "name" | "password" | "role" | "dietaryLifestyle" | "allergies" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
+  workAtCafeteria?: boolean | Prisma.User$workAtCafeteriaArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -572,9 +824,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    workAtCafeteria: Prisma.$CafeteriaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    cardId: number | null
     email: string
     name: string
     password: string
@@ -977,6 +1231,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workAtCafeteria<T extends Prisma.User$workAtCafeteriaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workAtCafeteriaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CafeteriaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1007,6 +1262,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
  */
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
+  readonly cardId: Prisma.FieldRef<"User", 'Int'>
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
@@ -1428,6 +1684,30 @@ export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * User.workAtCafeteria
+ */
+export type User$workAtCafeteriaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Cafeteria
+   */
+  select?: Prisma.CafeteriaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Cafeteria
+   */
+  omit?: Prisma.CafeteriaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CafeteriaInclude<ExtArgs> | null
+  where?: Prisma.CafeteriaWhereInput
+  orderBy?: Prisma.CafeteriaOrderByWithRelationInput | Prisma.CafeteriaOrderByWithRelationInput[]
+  cursor?: Prisma.CafeteriaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CafeteriaScalarFieldEnum | Prisma.CafeteriaScalarFieldEnum[]
 }
 
 /**

@@ -1,13 +1,18 @@
-import { User } from "../../prisma/generated/prisma/client.ts";
+import { Role} from "../../prisma/generated/prisma/client.ts";
+type User = {
+  role: Role,
+  id: string,
+  email:string 
+}
 
-type Permission =
+export type Permission =
   | "cafeteria:create"
   | "cafeteria:delete"
   | "cafeteria:update"
   | "cafeteria:read"
-  | "cafetaria-open-status:update"
-  | "cafetaria-open-status:read"
-  |"cafetaria-queue-status:read"
+  | "cafeteria-open-status:update"
+  | "cafeteria-open-status:read"
+  |"cafeteria-queue-status:read"
   | "cafeteria-queue-status:update"
   | "order-status:update" // involves setting order to 'completed' ,'ready', etc
   |"order-status:read"
@@ -32,11 +37,11 @@ const permissionsByRole: Record<User["role"], Permission[]> = {
         "order:read",
         "order-status:read",
         "cafeteria:read",
-        "cafetaria-open-status:read",
-        "cafetaria-queue-status:read"
+        "cafeteria-open-status:read",
+        "cafeteria-queue-status:read"
     ],
   STAFF: [
-    "cafetaria-open-status:update",
+    "cafeteria-open-status:update",
     "cafeteria-queue-status:update",
     "order-status:update", // involves setting order to 'completed' ,'ready', etc
     "order:create",
@@ -50,8 +55,9 @@ const permissionsByRole: Record<User["role"], Permission[]> = {
   ],
 };
 
-export function can(user: Pick<User, "role"> | null, permission: Permission) {
+export function can(user: Pick<User, "role"> | null, permission: Permission): boolean {
   // automatic failure for no user
+  console.log("USER::::", user)
   if (user == null) return false;
   return permissionsByRole[user.role].includes(permission);
 }

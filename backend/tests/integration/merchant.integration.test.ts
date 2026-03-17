@@ -8,12 +8,13 @@ describe("------- Merchant Endpoint Tests ---------", () => {
     it("should verify pickup order and return 200", async () => {
       const cafe = await TestHelpers.createCafeteria();
       const order = await TestHelpers.createOrder(cafe.id);
-      const status = 'READY'; 
-      await TestHelpers.updateOrder(order.id, status, cafe.id); 
+      const status = 'READY';
+      await TestHelpers.updateOrder(order.id, status, cafe.id);
+      
       const response = await request(app)
         .post("/api/merchant/order/verify")
         .send({ qrCodeSecret: order.qrCodeSecret, cafeteriaId: cafe.id });
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('data')
     });

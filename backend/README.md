@@ -1,5 +1,5 @@
 # Core Endpoint Features:
-## (I.) Cafetaria Merchant - Features 
+## ✔️ (I.) Cafetaria Merchant - Features  
 ---
 ### 1. Cafeteria Status Management
 
@@ -100,7 +100,103 @@ The "State Machine" that moves a single order through the kitchen process.
 | **Update Order** | `PATCH` | `/orders/:id` | `id` (URL), `status` (Body) |
 | **Verify Order Pickup**|`POST`|`/order/verify`| `qrCodeSecret`, `cafetariaId`|
 
+---
+
+
+
+## (II.) Student & Authentication - Features 
+---
+
+### 1. User Authentication (Registration & Login)
+
+Used to onboard users (Students/Staff) and provide secure access to the platform via JWT tokens.
+
+* **Endpoints:** `POST /api/auth/register`, `POST /api/auth/login`
+* **Controller Method:** `register`, `login`
+* **Payload (Body):**
+```json
+{
+  "email": "student.name@ashesi.edu.gh",
+  "password": "securepassword123",
+  "name": "Daniel Kpatamia"
+}
+```
+
+* **Impact:** Creates a user record in Postgres and returns a token. Sets the foundation for Role-Based Access Control (RBAC).
 
 ---
 
-## (II)  
+### 2. Cafeteria & Menu Discovery
+
+Allows customers to view all campus cafeterias, their live busy status, and their specific menu offerings.
+
+* **Endpoints:** `GET /api/cafeterias`, `GET /api/cafeterias/:id/menu`
+* **Controller Method:** `getCafeterias`, `getMenu`
+* **Parameters:** `id` (Cafeteria UUID)
+* **Logic:** Fetches cafeterias including their `capacityStatus` and `isOpen` boolean. Filters menu items by `isAvailable: true`.
+
+---
+
+### 3. Order Placement (Checkout)
+
+The core transaction where a student selects food items and schedules a pickup window.
+
+* **Endpoint:** `POST /api/orders`
+* **Controller Method:** `createOrder`
+* **Payload (Body):**
+```json
+{
+  "cafeteriaId": "uuid-string",
+  "items": [
+    { "menuItemId": "uuid-1", "quantity": 2 },
+    { "menuItemId": "uuid-2", "quantity": 1 }
+  ],
+  "pickupWindow": "2026-03-17T12:30:00Z"
+}
+```
+
+* **Impact:** Deducts balance (if integrated), creates `Order` and `OrderItem` records, and generates the unique `qrCodeSecret` for later verification.
+
+---
+
+### 4. Personal Order History
+Allows students to track their current active orders and view past purchases.
+
+* **Endpoint:** `GET /api/orders/my-history`
+* **Controller Method:** `getUserOrders`
+* **Logic:** Returns all orders associated with the logged-in user's ID, sorted by the most recent. Includes the `qrCodeSecret` for active orders to be rendered as QR codes.
+
+---
+
+### 5. Dietary & Allergy Profile
+
+Used to store student-specific dietary needs to highlight safe food options.
+
+* **Endpoint:** `PATCH /api/user/profile/preferences`
+* **Controller Method:** `updatePreferences`
+* **Payload (Body):**
+```json
+{
+  "allergies": ["Peanuts", "Shellfish"],
+  "dietaryLifestyle": "VEGAN"
+}
+```
+
+* **Impact:** Updates the `User` record in Postgres, allowing the frontend to flag menu items that contain allergens.
+
+---
+
+### Summary Table for Reference
+
+| Action | Method | URL | Required Data |
+| --- | --- | --- | --- |
+| **Register/Login** | `POST` | `/auth/...` | `email`, `password` |
+| **Browse Cafes** | `GET` | `/cafeterias` | None |
+| **View Menu** | `GET` | `/cafeterias/:id/menu` | `id` (URL) |
+| **Place Order** | `POST` | `/orders` | `cafeteriaId`, `items`, `pickupWindow` |
+| **Track Orders** | `GET` | `/orders/my-history` | Token (Header) |
+| **Update Health** | `PATCH` | `/user/profile/preferences` | `allergies`, `dietaryLifestyle` |
+
+---
+
+

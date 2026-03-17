@@ -1,6 +1,7 @@
 import { prisma } from "../../src/lib/prisma.ts";
 import { v4 as uuidv4 } from 'uuid';
 import { CapacityStatus, OrderStatus, Role } from "../../prisma/generated/prisma/enums.ts";
+import { hashPassword } from "utils/password.utils.ts";
 
 export const TestHelpers = {
   async clearDatabase() {
@@ -14,23 +15,35 @@ export const TestHelpers = {
 
  
   async createUser(overrides = {}) {
-    return await prisma.user.create({
+    const rawPwd = "rawpadwe24";
+    const hPwd = await hashPassword(rawPwd);  
+    const result =  await prisma.user.create({
       data: {
         email: `user-${uuidv4()}@ashesi.edu.gh`,
         name: "Daniel Kwasi",
-        password: "secure_password",
+        password: hPwd,
         role: Role.CUSTOMER,
         ...overrides,
       },
+      select: {
+        id: true,
+        email: true,
+        allergies: true,
+        role: true,
+       orders:true
+      }
     });
+    return {...result, rawPwd: rawPwd}
   },
 
   async createCafeteria(name = "Akornor", status = CapacityStatus.GREEN) {
+    const user = await this.createUser(); 
     return await prisma.cafeteria.create({
       data: {
         name: `${name}-${uuidv4().substring(0, 4)}`, // Ensure uniqueness
         capacityStatus: status,
         isOpen: true,
+        userId: user.id
       },
     });
   },

@@ -5,7 +5,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet  from 'helmet';
 import { isTest } from '../env.ts';
-import { merchantRouter } from './routes/index.ts';
+import { merchantRouter, authRouter, cafeteriaRouter } from './routes/index.ts';
 import { errorHandler } from 'middlewares/error.middleware.ts';
 import { notFoundError } from 'middlewares/error.middleware.ts';
 
@@ -35,7 +35,8 @@ app.use('/health', (req, res) => {
 
 // -------------------- ROUTES ----------------------------
 app.use('/api/merchant', merchantRouter) ; 
- 
+app.use('/api/auth', authRouter); 
+app.use('/api/cafeterias', cafeteriaRouter); 
 
 
 // error handlers

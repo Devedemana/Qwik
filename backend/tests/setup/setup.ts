@@ -1,8 +1,9 @@
 import { prisma } from "../../src/lib/prisma.ts";
-import { afterEach } from "vitest";
+import { afterEach, beforeEach} from "vitest";
 
-afterEach(async () => {
+beforeEach(async () => {
   try {
+    console.log("Cleaning db before next test ")
     await prisma.order.deleteMany();
     await prisma.menuItem.deleteMany();
     await prisma.cafeteria.deleteMany();

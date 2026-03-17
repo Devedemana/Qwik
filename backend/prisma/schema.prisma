@@ -13,6 +13,7 @@ datasource db {
 
 model User {
   id               String   @id @default(uuid())
+  cardId           Int ? 
   email            String   @unique
   name             String
   password         String
@@ -21,6 +22,8 @@ model User {
   allergies        String[]
   orders           Order[]
   createdAt        DateTime @default(now())
+
+  workAtCafeteria  Cafeteria[]
 }
 
 enum Role {
@@ -31,12 +34,14 @@ enum Role {
 
 model Cafeteria {
   id             String         @id @default(uuid())
+  userId         String       
   name           String         @unique
   isOpen         Boolean        @default(true)
   capacityStatus CapacityStatus @default(GREEN)
   menuItems      MenuItem[]
   orders         Order[]
-}
+  workers        User[]
+  }
 
 enum CapacityStatus {
   GREEN

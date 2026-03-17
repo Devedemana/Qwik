@@ -26,6 +26,7 @@ export type AggregateCafeteria = {
 
 export type CafeteriaMinAggregateOutputType = {
   id: string | null
+  userId: string | null
   name: string | null
   isOpen: boolean | null
   capacityStatus: $Enums.CapacityStatus | null
@@ -33,6 +34,7 @@ export type CafeteriaMinAggregateOutputType = {
 
 export type CafeteriaMaxAggregateOutputType = {
   id: string | null
+  userId: string | null
   name: string | null
   isOpen: boolean | null
   capacityStatus: $Enums.CapacityStatus | null
@@ -40,6 +42,7 @@ export type CafeteriaMaxAggregateOutputType = {
 
 export type CafeteriaCountAggregateOutputType = {
   id: number
+  userId: number
   name: number
   isOpen: number
   capacityStatus: number
@@ -49,6 +52,7 @@ export type CafeteriaCountAggregateOutputType = {
 
 export type CafeteriaMinAggregateInputType = {
   id?: true
+  userId?: true
   name?: true
   isOpen?: true
   capacityStatus?: true
@@ -56,6 +60,7 @@ export type CafeteriaMinAggregateInputType = {
 
 export type CafeteriaMaxAggregateInputType = {
   id?: true
+  userId?: true
   name?: true
   isOpen?: true
   capacityStatus?: true
@@ -63,6 +68,7 @@ export type CafeteriaMaxAggregateInputType = {
 
 export type CafeteriaCountAggregateInputType = {
   id?: true
+  userId?: true
   name?: true
   isOpen?: true
   capacityStatus?: true
@@ -143,6 +149,7 @@ export type CafeteriaGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type CafeteriaGroupByOutputType = {
   id: string
+  userId: string
   name: string
   isOpen: boolean
   capacityStatus: $Enums.CapacityStatus
@@ -171,20 +178,24 @@ export type CafeteriaWhereInput = {
   OR?: Prisma.CafeteriaWhereInput[]
   NOT?: Prisma.CafeteriaWhereInput | Prisma.CafeteriaWhereInput[]
   id?: Prisma.StringFilter<"Cafeteria"> | string
+  userId?: Prisma.StringFilter<"Cafeteria"> | string
   name?: Prisma.StringFilter<"Cafeteria"> | string
   isOpen?: Prisma.BoolFilter<"Cafeteria"> | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFilter<"Cafeteria"> | $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  workers?: Prisma.UserListRelationFilter
 }
 
 export type CafeteriaOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isOpen?: Prisma.SortOrder
   capacityStatus?: Prisma.SortOrder
   menuItems?: Prisma.MenuItemOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  workers?: Prisma.UserOrderByRelationAggregateInput
 }
 
 export type CafeteriaWhereUniqueInput = Prisma.AtLeast<{
@@ -193,14 +204,17 @@ export type CafeteriaWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CafeteriaWhereInput | Prisma.CafeteriaWhereInput[]
   OR?: Prisma.CafeteriaWhereInput[]
   NOT?: Prisma.CafeteriaWhereInput | Prisma.CafeteriaWhereInput[]
+  userId?: Prisma.StringFilter<"Cafeteria"> | string
   isOpen?: Prisma.BoolFilter<"Cafeteria"> | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFilter<"Cafeteria"> | $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  workers?: Prisma.UserListRelationFilter
 }, "id" | "name">
 
 export type CafeteriaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isOpen?: Prisma.SortOrder
   capacityStatus?: Prisma.SortOrder
@@ -214,6 +228,7 @@ export type CafeteriaScalarWhereWithAggregatesInput = {
   OR?: Prisma.CafeteriaScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CafeteriaScalarWhereWithAggregatesInput | Prisma.CafeteriaScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Cafeteria"> | string
+  userId?: Prisma.StringWithAggregatesFilter<"Cafeteria"> | string
   name?: Prisma.StringWithAggregatesFilter<"Cafeteria"> | string
   isOpen?: Prisma.BoolWithAggregatesFilter<"Cafeteria"> | boolean
   capacityStatus?: Prisma.EnumCapacityStatusWithAggregatesFilter<"Cafeteria"> | $Enums.CapacityStatus
@@ -221,42 +236,51 @@ export type CafeteriaScalarWhereWithAggregatesInput = {
 
 export type CafeteriaCreateInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemCreateNestedManyWithoutCafeteriaInput
   orders?: Prisma.OrderCreateNestedManyWithoutCafeteriaInput
+  workers?: Prisma.UserCreateNestedManyWithoutWorkAtCafeteriaInput
 }
 
 export type CafeteriaUncheckedCreateInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutCafeteriaInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCafeteriaInput
+  workers?: Prisma.UserUncheckedCreateNestedManyWithoutWorkAtCafeteriaInput
 }
 
 export type CafeteriaUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemUpdateManyWithoutCafeteriaNestedInput
   orders?: Prisma.OrderUpdateManyWithoutCafeteriaNestedInput
+  workers?: Prisma.UserUpdateManyWithoutWorkAtCafeteriaNestedInput
 }
 
 export type CafeteriaUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutCafeteriaNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCafeteriaNestedInput
+  workers?: Prisma.UserUncheckedUpdateManyWithoutWorkAtCafeteriaNestedInput
 }
 
 export type CafeteriaCreateManyInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
@@ -264,6 +288,7 @@ export type CafeteriaCreateManyInput = {
 
 export type CafeteriaUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
@@ -271,13 +296,25 @@ export type CafeteriaUpdateManyMutationInput = {
 
 export type CafeteriaUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
 }
 
+export type CafeteriaListRelationFilter = {
+  every?: Prisma.CafeteriaWhereInput
+  some?: Prisma.CafeteriaWhereInput
+  none?: Prisma.CafeteriaWhereInput
+}
+
+export type CafeteriaOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type CafeteriaCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isOpen?: Prisma.SortOrder
   capacityStatus?: Prisma.SortOrder
@@ -285,6 +322,7 @@ export type CafeteriaCountOrderByAggregateInput = {
 
 export type CafeteriaMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isOpen?: Prisma.SortOrder
   capacityStatus?: Prisma.SortOrder
@@ -292,6 +330,7 @@ export type CafeteriaMaxOrderByAggregateInput = {
 
 export type CafeteriaMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isOpen?: Prisma.SortOrder
   capacityStatus?: Prisma.SortOrder
@@ -300,6 +339,44 @@ export type CafeteriaMinOrderByAggregateInput = {
 export type CafeteriaScalarRelationFilter = {
   is?: Prisma.CafeteriaWhereInput
   isNot?: Prisma.CafeteriaWhereInput
+}
+
+export type CafeteriaCreateNestedManyWithoutWorkersInput = {
+  create?: Prisma.XOR<Prisma.CafeteriaCreateWithoutWorkersInput, Prisma.CafeteriaUncheckedCreateWithoutWorkersInput> | Prisma.CafeteriaCreateWithoutWorkersInput[] | Prisma.CafeteriaUncheckedCreateWithoutWorkersInput[]
+  connectOrCreate?: Prisma.CafeteriaCreateOrConnectWithoutWorkersInput | Prisma.CafeteriaCreateOrConnectWithoutWorkersInput[]
+  connect?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+}
+
+export type CafeteriaUncheckedCreateNestedManyWithoutWorkersInput = {
+  create?: Prisma.XOR<Prisma.CafeteriaCreateWithoutWorkersInput, Prisma.CafeteriaUncheckedCreateWithoutWorkersInput> | Prisma.CafeteriaCreateWithoutWorkersInput[] | Prisma.CafeteriaUncheckedCreateWithoutWorkersInput[]
+  connectOrCreate?: Prisma.CafeteriaCreateOrConnectWithoutWorkersInput | Prisma.CafeteriaCreateOrConnectWithoutWorkersInput[]
+  connect?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+}
+
+export type CafeteriaUpdateManyWithoutWorkersNestedInput = {
+  create?: Prisma.XOR<Prisma.CafeteriaCreateWithoutWorkersInput, Prisma.CafeteriaUncheckedCreateWithoutWorkersInput> | Prisma.CafeteriaCreateWithoutWorkersInput[] | Prisma.CafeteriaUncheckedCreateWithoutWorkersInput[]
+  connectOrCreate?: Prisma.CafeteriaCreateOrConnectWithoutWorkersInput | Prisma.CafeteriaCreateOrConnectWithoutWorkersInput[]
+  upsert?: Prisma.CafeteriaUpsertWithWhereUniqueWithoutWorkersInput | Prisma.CafeteriaUpsertWithWhereUniqueWithoutWorkersInput[]
+  set?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  disconnect?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  delete?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  connect?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  update?: Prisma.CafeteriaUpdateWithWhereUniqueWithoutWorkersInput | Prisma.CafeteriaUpdateWithWhereUniqueWithoutWorkersInput[]
+  updateMany?: Prisma.CafeteriaUpdateManyWithWhereWithoutWorkersInput | Prisma.CafeteriaUpdateManyWithWhereWithoutWorkersInput[]
+  deleteMany?: Prisma.CafeteriaScalarWhereInput | Prisma.CafeteriaScalarWhereInput[]
+}
+
+export type CafeteriaUncheckedUpdateManyWithoutWorkersNestedInput = {
+  create?: Prisma.XOR<Prisma.CafeteriaCreateWithoutWorkersInput, Prisma.CafeteriaUncheckedCreateWithoutWorkersInput> | Prisma.CafeteriaCreateWithoutWorkersInput[] | Prisma.CafeteriaUncheckedCreateWithoutWorkersInput[]
+  connectOrCreate?: Prisma.CafeteriaCreateOrConnectWithoutWorkersInput | Prisma.CafeteriaCreateOrConnectWithoutWorkersInput[]
+  upsert?: Prisma.CafeteriaUpsertWithWhereUniqueWithoutWorkersInput | Prisma.CafeteriaUpsertWithWhereUniqueWithoutWorkersInput[]
+  set?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  disconnect?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  delete?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  connect?: Prisma.CafeteriaWhereUniqueInput | Prisma.CafeteriaWhereUniqueInput[]
+  update?: Prisma.CafeteriaUpdateWithWhereUniqueWithoutWorkersInput | Prisma.CafeteriaUpdateWithWhereUniqueWithoutWorkersInput[]
+  updateMany?: Prisma.CafeteriaUpdateManyWithWhereWithoutWorkersInput | Prisma.CafeteriaUpdateManyWithWhereWithoutWorkersInput[]
+  deleteMany?: Prisma.CafeteriaScalarWhereInput | Prisma.CafeteriaScalarWhereInput[]
 }
 
 export type BoolFieldUpdateOperationsInput = {
@@ -338,20 +415,76 @@ export type CafeteriaUpdateOneRequiredWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CafeteriaUpdateToOneWithWhereWithoutOrdersInput, Prisma.CafeteriaUpdateWithoutOrdersInput>, Prisma.CafeteriaUncheckedUpdateWithoutOrdersInput>
 }
 
+export type CafeteriaCreateWithoutWorkersInput = {
+  id?: string
+  userId: string
+  name: string
+  isOpen?: boolean
+  capacityStatus?: $Enums.CapacityStatus
+  menuItems?: Prisma.MenuItemCreateNestedManyWithoutCafeteriaInput
+  orders?: Prisma.OrderCreateNestedManyWithoutCafeteriaInput
+}
+
+export type CafeteriaUncheckedCreateWithoutWorkersInput = {
+  id?: string
+  userId: string
+  name: string
+  isOpen?: boolean
+  capacityStatus?: $Enums.CapacityStatus
+  menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutCafeteriaInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCafeteriaInput
+}
+
+export type CafeteriaCreateOrConnectWithoutWorkersInput = {
+  where: Prisma.CafeteriaWhereUniqueInput
+  create: Prisma.XOR<Prisma.CafeteriaCreateWithoutWorkersInput, Prisma.CafeteriaUncheckedCreateWithoutWorkersInput>
+}
+
+export type CafeteriaUpsertWithWhereUniqueWithoutWorkersInput = {
+  where: Prisma.CafeteriaWhereUniqueInput
+  update: Prisma.XOR<Prisma.CafeteriaUpdateWithoutWorkersInput, Prisma.CafeteriaUncheckedUpdateWithoutWorkersInput>
+  create: Prisma.XOR<Prisma.CafeteriaCreateWithoutWorkersInput, Prisma.CafeteriaUncheckedCreateWithoutWorkersInput>
+}
+
+export type CafeteriaUpdateWithWhereUniqueWithoutWorkersInput = {
+  where: Prisma.CafeteriaWhereUniqueInput
+  data: Prisma.XOR<Prisma.CafeteriaUpdateWithoutWorkersInput, Prisma.CafeteriaUncheckedUpdateWithoutWorkersInput>
+}
+
+export type CafeteriaUpdateManyWithWhereWithoutWorkersInput = {
+  where: Prisma.CafeteriaScalarWhereInput
+  data: Prisma.XOR<Prisma.CafeteriaUpdateManyMutationInput, Prisma.CafeteriaUncheckedUpdateManyWithoutWorkersInput>
+}
+
+export type CafeteriaScalarWhereInput = {
+  AND?: Prisma.CafeteriaScalarWhereInput | Prisma.CafeteriaScalarWhereInput[]
+  OR?: Prisma.CafeteriaScalarWhereInput[]
+  NOT?: Prisma.CafeteriaScalarWhereInput | Prisma.CafeteriaScalarWhereInput[]
+  id?: Prisma.StringFilter<"Cafeteria"> | string
+  userId?: Prisma.StringFilter<"Cafeteria"> | string
+  name?: Prisma.StringFilter<"Cafeteria"> | string
+  isOpen?: Prisma.BoolFilter<"Cafeteria"> | boolean
+  capacityStatus?: Prisma.EnumCapacityStatusFilter<"Cafeteria"> | $Enums.CapacityStatus
+}
+
 export type CafeteriaCreateWithoutMenuItemsInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
   orders?: Prisma.OrderCreateNestedManyWithoutCafeteriaInput
+  workers?: Prisma.UserCreateNestedManyWithoutWorkAtCafeteriaInput
 }
 
 export type CafeteriaUncheckedCreateWithoutMenuItemsInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCafeteriaInput
+  workers?: Prisma.UserUncheckedCreateNestedManyWithoutWorkAtCafeteriaInput
 }
 
 export type CafeteriaCreateOrConnectWithoutMenuItemsInput = {
@@ -372,34 +505,42 @@ export type CafeteriaUpdateToOneWithWhereWithoutMenuItemsInput = {
 
 export type CafeteriaUpdateWithoutMenuItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
   orders?: Prisma.OrderUpdateManyWithoutCafeteriaNestedInput
+  workers?: Prisma.UserUpdateManyWithoutWorkAtCafeteriaNestedInput
 }
 
 export type CafeteriaUncheckedUpdateWithoutMenuItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
   orders?: Prisma.OrderUncheckedUpdateManyWithoutCafeteriaNestedInput
+  workers?: Prisma.UserUncheckedUpdateManyWithoutWorkAtCafeteriaNestedInput
 }
 
 export type CafeteriaCreateWithoutOrdersInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemCreateNestedManyWithoutCafeteriaInput
+  workers?: Prisma.UserCreateNestedManyWithoutWorkAtCafeteriaInput
 }
 
 export type CafeteriaUncheckedCreateWithoutOrdersInput = {
   id?: string
+  userId: string
   name: string
   isOpen?: boolean
   capacityStatus?: $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutCafeteriaInput
+  workers?: Prisma.UserUncheckedCreateNestedManyWithoutWorkAtCafeteriaInput
 }
 
 export type CafeteriaCreateOrConnectWithoutOrdersInput = {
@@ -420,18 +561,50 @@ export type CafeteriaUpdateToOneWithWhereWithoutOrdersInput = {
 
 export type CafeteriaUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemUpdateManyWithoutCafeteriaNestedInput
+  workers?: Prisma.UserUpdateManyWithoutWorkAtCafeteriaNestedInput
 }
 
 export type CafeteriaUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
   capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
   menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutCafeteriaNestedInput
+  workers?: Prisma.UserUncheckedUpdateManyWithoutWorkAtCafeteriaNestedInput
+}
+
+export type CafeteriaUpdateWithoutWorkersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
+  menuItems?: Prisma.MenuItemUpdateManyWithoutCafeteriaNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutCafeteriaNestedInput
+}
+
+export type CafeteriaUncheckedUpdateWithoutWorkersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
+  menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutCafeteriaNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutCafeteriaNestedInput
+}
+
+export type CafeteriaUncheckedUpdateManyWithoutWorkersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  capacityStatus?: Prisma.EnumCapacityStatusFieldUpdateOperationsInput | $Enums.CapacityStatus
 }
 
 
@@ -442,11 +615,13 @@ export type CafeteriaUncheckedUpdateWithoutOrdersInput = {
 export type CafeteriaCountOutputType = {
   menuItems: number
   orders: number
+  workers: number
 }
 
 export type CafeteriaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   menuItems?: boolean | CafeteriaCountOutputTypeCountMenuItemsArgs
   orders?: boolean | CafeteriaCountOutputTypeCountOrdersArgs
+  workers?: boolean | CafeteriaCountOutputTypeCountWorkersArgs
 }
 
 /**
@@ -473,19 +648,29 @@ export type CafeteriaCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Type
   where?: Prisma.OrderWhereInput
 }
 
+/**
+ * CafeteriaCountOutputType without action
+ */
+export type CafeteriaCountOutputTypeCountWorkersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserWhereInput
+}
+
 
 export type CafeteriaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   name?: boolean
   isOpen?: boolean
   capacityStatus?: boolean
   menuItems?: boolean | Prisma.Cafeteria$menuItemsArgs<ExtArgs>
   orders?: boolean | Prisma.Cafeteria$ordersArgs<ExtArgs>
+  workers?: boolean | Prisma.Cafeteria$workersArgs<ExtArgs>
   _count?: boolean | Prisma.CafeteriaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cafeteria"]>
 
 export type CafeteriaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   name?: boolean
   isOpen?: boolean
   capacityStatus?: boolean
@@ -493,6 +678,7 @@ export type CafeteriaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
 
 export type CafeteriaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   name?: boolean
   isOpen?: boolean
   capacityStatus?: boolean
@@ -500,15 +686,17 @@ export type CafeteriaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 
 export type CafeteriaSelectScalar = {
   id?: boolean
+  userId?: boolean
   name?: boolean
   isOpen?: boolean
   capacityStatus?: boolean
 }
 
-export type CafeteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "isOpen" | "capacityStatus", ExtArgs["result"]["cafeteria"]>
+export type CafeteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "isOpen" | "capacityStatus", ExtArgs["result"]["cafeteria"]>
 export type CafeteriaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   menuItems?: boolean | Prisma.Cafeteria$menuItemsArgs<ExtArgs>
   orders?: boolean | Prisma.Cafeteria$ordersArgs<ExtArgs>
+  workers?: boolean | Prisma.Cafeteria$workersArgs<ExtArgs>
   _count?: boolean | Prisma.CafeteriaCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CafeteriaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -519,9 +707,11 @@ export type $CafeteriaPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     menuItems: Prisma.$MenuItemPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    workers: Prisma.$UserPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    userId: string
     name: string
     isOpen: boolean
     capacityStatus: $Enums.CapacityStatus
@@ -921,6 +1111,7 @@ export interface Prisma__CafeteriaClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   menuItems<T extends Prisma.Cafeteria$menuItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Cafeteria$menuItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MenuItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Cafeteria$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Cafeteria$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workers<T extends Prisma.Cafeteria$workersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Cafeteria$workersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -951,6 +1142,7 @@ export interface Prisma__CafeteriaClient<T, Null = never, ExtArgs extends runtim
  */
 export interface CafeteriaFieldRefs {
   readonly id: Prisma.FieldRef<"Cafeteria", 'String'>
+  readonly userId: Prisma.FieldRef<"Cafeteria", 'String'>
   readonly name: Prisma.FieldRef<"Cafeteria", 'String'>
   readonly isOpen: Prisma.FieldRef<"Cafeteria", 'Boolean'>
   readonly capacityStatus: Prisma.FieldRef<"Cafeteria", 'CapacityStatus'>
@@ -1392,6 +1584,30 @@ export type Cafeteria$ordersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * Cafeteria.workers
+ */
+export type Cafeteria$workersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+  orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]
+  cursor?: Prisma.UserWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserScalarFieldEnum | Prisma.UserScalarFieldEnum[]
 }
 
 /**

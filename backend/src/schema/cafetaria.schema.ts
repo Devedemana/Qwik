@@ -20,6 +20,16 @@ export const menuItemSchema = z.object({
   })
 });
 
+export const createCafeteriaSchema = z.object({
+    name: z.string().min(2),
+    isOpen: z.boolean(),
+    userId: z.string()
+});
+
+export const cafeteriaIdSchema = z.object({
+  id: z.string('Cafetaria id must be a valid string ')
+})
+
 export const CafeteriaAvailabilitySchema = z.object({
   isOpne: z.boolean().default(true),
   cafeteriaId: z.string()
