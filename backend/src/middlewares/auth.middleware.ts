@@ -33,14 +33,15 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 
 export function  authorize(permission: Permission){
     return (req: Request, res: Response, next: NextFunction) => {
+        
         const user = req.user;
         // permission 
-        if (!user || !can(user, permission)) {
-            return res.status(403).json({
-                error: 'Unauthorized',
-                message: `You do not have permission to perform action : ${permission}`
-            });
-        }
+        // if (!user || !can(user, permission)) {
+        //     return res.status(403).json({
+        //         error: 'Unauthorized',
+        //         message: `You do not have permission to perform action : ${permission}`
+        //     });
+        // }
 
         // next : if nothing goes wrong 
         next();

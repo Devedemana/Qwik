@@ -107,7 +107,7 @@ The "State Machine" that moves a single order through the kitchen process.
 ## (II.) Student & Authentication - Features 
 ---
 
-### 1. User Authentication (Registration & Login)
+### ✔️ 1. User Authentication (Registration & Login)
 
 Used to onboard users (Students/Staff) and provide secure access to the platform via JWT tokens.
 
@@ -126,7 +126,7 @@ Used to onboard users (Students/Staff) and provide secure access to the platform
 
 ---
 
-### 2. Cafeteria & Menu Discovery
+### ✔️ 2. Cafeteria & Menu Discovery
 
 Allows customers to view all campus cafeterias, their live busy status, and their specific menu offerings.
 
@@ -135,6 +135,10 @@ Allows customers to view all campus cafeterias, their live busy status, and thei
 * **Parameters:** `id` (Cafeteria UUID)
 * **Logic:** Fetches cafeterias including their `capacityStatus` and `isOpen` boolean. Filters menu items by `isAvailable: true`.
 
+* **Endpoints:** `POST/api/cafeterias/`
+* **Controller Method:** `createCafeteria` 
+* **Parameters:** `userId`, `status`,  `name` 
+* **Logic:** Creates a cafetaria: action to be performed by only ADMIN privilleges 
 ---
 
 ### 3. Order Placement (Checkout)

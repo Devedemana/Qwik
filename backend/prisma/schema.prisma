@@ -66,7 +66,6 @@ model MenuItem {
 model Order {
   id           String      @id @default(uuid())
   userId       String
-  user         User        @relation(fields: [userId], references: [id])
   cafeteriaId  String
   totalAmount  Float
   status       OrderStatus @default(PENDING_PAYMENT)
@@ -75,7 +74,8 @@ model Order {
   qrCodeSecret String      @unique
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-
+  
+  user         User        @relation(fields: [userId], references: [id])
   items        OrderItem[]
   cafeteria    Cafeteria   @relation(fields: [cafeteriaId], references: [id])
 }

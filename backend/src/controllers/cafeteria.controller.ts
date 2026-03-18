@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import {CafeteriaService} from '../services/cafeteria.services.ts'
-import { can } from '../rbac/permissions.rbac.ts'
+import { CafeteriaService } from '../services/cafeteria.services.ts'
+import { can } from 'rbac/permissions.rbac.ts';
 
 
 export const CafeteriaController = {
@@ -10,7 +10,7 @@ export const CafeteriaController = {
             return res.status(200).json({
                 success: true,
                 data: activeCafeterias
-            })
+            });
         } catch (err) {
             return res.status(500).json({
                 error: 'error',
@@ -36,8 +36,8 @@ export const CafeteriaController = {
     },
     async createCafeteria(req: Request, res: Response) {
         try {
-            const { ...name } = req.body
-            const newCafetaria = await CafeteriaService.createCafeteria(name);
+            const { ...body } = req.body
+            const newCafetaria = await CafeteriaService.createCafeteria(body);
             return res.status(201).json({
                 success: true,
                 data: newCafetaria

@@ -3,7 +3,6 @@ import { CapacityStatus, Role } from "../../prisma/generated/prisma/enums.ts";
 import { createCafeteriaSchema } from "schema/cafetaria.schema.ts";
 import { prisma } from "../lib/prisma.ts";
 import { z } from 'zod'; 
-import { can } from '../rbac/permissions.rbac.ts'
 
 
 export const  CafeteriaService = {

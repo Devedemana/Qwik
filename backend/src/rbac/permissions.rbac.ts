@@ -57,7 +57,6 @@ const permissionsByRole: Record<User["role"], Permission[]> = {
 
 export function can(user: Pick<User, "role"> | null, permission: Permission): boolean {
   // automatic failure for no user
-  console.log("USER::::", user)
   if (user == null) return false;
-  return permissionsByRole[user.role].includes(permission);
+  return permissionsByRole[user.role as Role].includes(permission);
 }

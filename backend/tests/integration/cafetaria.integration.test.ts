@@ -35,13 +35,11 @@ describe("------- Cafeteria Endpoint Tests ---------", () => {
         it("Should create cafeteria and return 201", async () => {
             const user =await  TestHelpers.createUser({ role: "ADMIN" });
             const token = await generateToken({ id: user.id, email: user.email, role: user.role });
-            console.log("USER ROLE: ", user.role)
+
             const response = await request(app)
                 .post('/api/cafeterias/cafeteria')
-                .set('authorization', `Bear ${token}`)
-                .send({ name: 'Dann-Milo', userId: user.id, isOpen:true })
-            
-            console.log('RESULT: ', response.body)
+                .set('authorization', `Bearer ${token}`)
+                .send({ name: 'Dann-Milo',isOpen:true,  userId: user.id })
             
             expect(response.status).toBe(201);
         })
