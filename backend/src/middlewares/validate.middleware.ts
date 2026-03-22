@@ -37,8 +37,8 @@ export const validateBody = (schema: ZodObject) => {
         })
       }
 
-      // other than that
-      req.query = result.data; 
+      // // other than that
+      // req.query = result.data; 
 
       next()
    };
@@ -59,7 +59,7 @@ export const validateBody = (schema: ZodObject) => {
         }
 
         // if no error 
-        req.params = result.data; 
+        // req.params = result.data; 
 
         next();
   };

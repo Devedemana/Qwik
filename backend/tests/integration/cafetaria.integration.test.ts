@@ -8,9 +8,9 @@ import { generateToken } from "utils/jwt.utils.ts";
 describe("------- Cafeteria Endpoint Tests ---------", () => {
     describe('GET: ', () => {
         it("should gate all cafetarias and return 200", async () => {
-            const cafe1 = await TestHelpers.createCafeteria();
-            const cafe2 = await TestHelpers.createCafeteria(); 
-            const cafe3 = await TestHelpers.createCafeteria(); 
+            await TestHelpers.createCafeteria();
+            await TestHelpers.createCafeteria(); 
+            await TestHelpers.createCafeteria(); 
       
             const response = await request(app)
                 .get("/api/cafeterias");
@@ -20,9 +20,9 @@ describe("------- Cafeteria Endpoint Tests ---------", () => {
         });
 
         it("should get menuItems for a  specific cafetaria & return 200", async () => {
-            const cafe1 = await TestHelpers.createCafeteria();
-            const cafe2 = await TestHelpers.createCafeteria();
-            const cafe3 = await TestHelpers.createCafeteria();
+             await TestHelpers.createCafeteria();
+             await TestHelpers.createCafeteria();
+            const cafe1 =  await TestHelpers.createCafeteria();
             const response = await request(app)
                 .get(`/api/cafeterias/${cafe1.id}/menu `);
         
@@ -39,9 +39,10 @@ describe("------- Cafeteria Endpoint Tests ---------", () => {
             const response = await request(app)
                 .post('/api/cafeterias/cafeteria')
                 .set('authorization', `Bearer ${token}`)
-                .send({ name: 'Dann-Milo',isOpen:true,  userId: user.id })
+                .send({ name: 'Munichies Cafe', isOpen:true,  userId: user.id });
             
             expect(response.status).toBe(201);
+            expect(response.body).toHaveProperty("data")
         })
     })
 })

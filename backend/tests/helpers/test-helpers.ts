@@ -63,8 +63,10 @@ export const TestHelpers = {
   },
 
 
-  async createOrder(cafeteriaId: string, status = OrderStatus.PENDING_PAYMENT) {
+  async createOrder(cafeteriaId: string,  status = OrderStatus.PENDING_PAYMENT) {
     const user = await this.createUser();
+    const menuItem1 = await this.createMenuItem(cafeteriaId, {name:"Joita Mono"}); 
+    const menuItem2 = await this.createMenuItem(cafeteriaId, {name:'Jammy Rice'}); 
     
     return await prisma.order.create({
       data: {
@@ -78,16 +80,20 @@ export const TestHelpers = {
         items: {
           create: [
             {
-              menuItemId: uuidv4(), // Mock ID or link to a real MenuItem
-              name: "Jollof Rice",
-              price: 15.0,
+              menuItemId: menuItem1.id, // Mock ID or link to a real MenuItem
               quantity: 2,
+            },
+            {
+              menuItemId: menuItem2.id, // Mock ID or link to a real MenuItem
+              quantity: 3,
             },
           ],
         },
       },
-      include: {
+      select: {
         items: true,
+        qrCodeSecret: true,
+        id: true
       },
     });
   },

@@ -60,6 +60,8 @@ model MenuItem {
   allergenTags String[]
   imageUrl     String?
 
+
+  orderItems   OrderItem[] // not going to be used 
   cafeteria    Cafeteria @relation(fields: [cafeteriaId], references: [id])
 }
 
@@ -74,22 +76,20 @@ model Order {
   qrCodeSecret String      @unique
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  items        OrderItem[]
   
   user         User        @relation(fields: [userId], references: [id])
-  items        OrderItem[]
   cafeteria    Cafeteria   @relation(fields: [cafeteriaId], references: [id])
 }
 
-// In Postgres, OrderItem must be a model to support relations
 model OrderItem {
-  id         String @id @default(uuid())
-  orderId    String
-  menuItemId String
-  name       String
-  price      Float
-  quantity   Int
+  id          String @id @default(uuid())
+  menuItemId  String
+  quantity    Int
 
-  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String?
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+  order       Order? @relation(fields: [orderId], references: [id])
 }
 
 enum OrderStatus {

@@ -244,6 +244,7 @@ export type MenuItemWhereInput = {
   isAvailable?: Prisma.BoolFilter<"MenuItem"> | boolean
   allergenTags?: Prisma.StringNullableListFilter<"MenuItem">
   imageUrl?: Prisma.StringNullableFilter<"MenuItem"> | string | null
+  orderItems?: Prisma.OrderItemListRelationFilter
   cafeteria?: Prisma.XOR<Prisma.CafeteriaScalarRelationFilter, Prisma.CafeteriaWhereInput>
 }
 
@@ -257,6 +258,7 @@ export type MenuItemOrderByWithRelationInput = {
   isAvailable?: Prisma.SortOrder
   allergenTags?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  orderItems?: Prisma.OrderItemOrderByRelationAggregateInput
   cafeteria?: Prisma.CafeteriaOrderByWithRelationInput
 }
 
@@ -273,6 +275,7 @@ export type MenuItemWhereUniqueInput = Prisma.AtLeast<{
   isAvailable?: Prisma.BoolFilter<"MenuItem"> | boolean
   allergenTags?: Prisma.StringNullableListFilter<"MenuItem">
   imageUrl?: Prisma.StringNullableFilter<"MenuItem"> | string | null
+  orderItems?: Prisma.OrderItemListRelationFilter
   cafeteria?: Prisma.XOR<Prisma.CafeteriaScalarRelationFilter, Prisma.CafeteriaWhereInput>
 }, "id">
 
@@ -317,6 +320,7 @@ export type MenuItemCreateInput = {
   isAvailable?: boolean
   allergenTags?: Prisma.MenuItemCreateallergenTagsInput | string[]
   imageUrl?: string | null
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
   cafeteria: Prisma.CafeteriaCreateNestedOneWithoutMenuItemsInput
 }
 
@@ -330,6 +334,7 @@ export type MenuItemUncheckedCreateInput = {
   isAvailable?: boolean
   allergenTags?: Prisma.MenuItemCreateallergenTagsInput | string[]
   imageUrl?: string | null
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUpdateInput = {
@@ -341,6 +346,7 @@ export type MenuItemUpdateInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allergenTags?: Prisma.MenuItemUpdateallergenTagsInput | string[]
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
   cafeteria?: Prisma.CafeteriaUpdateOneRequiredWithoutMenuItemsNestedInput
 }
 
@@ -354,6 +360,7 @@ export type MenuItemUncheckedUpdateInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allergenTags?: Prisma.MenuItemUpdateallergenTagsInput | string[]
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemCreateManyInput = {
@@ -443,6 +450,11 @@ export type MenuItemSumOrderByAggregateInput = {
   price?: Prisma.SortOrder
 }
 
+export type MenuItemScalarRelationFilter = {
+  is?: Prisma.MenuItemWhereInput
+  isNot?: Prisma.MenuItemWhereInput
+}
+
 export type MenuItemCreateNestedManyWithoutCafeteriaInput = {
   create?: Prisma.XOR<Prisma.MenuItemCreateWithoutCafeteriaInput, Prisma.MenuItemUncheckedCreateWithoutCafeteriaInput> | Prisma.MenuItemCreateWithoutCafeteriaInput[] | Prisma.MenuItemUncheckedCreateWithoutCafeteriaInput[]
   connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutCafeteriaInput | Prisma.MenuItemCreateOrConnectWithoutCafeteriaInput[]
@@ -506,6 +518,20 @@ export type MenuItemUpdateallergenTagsInput = {
   push?: string | string[]
 }
 
+export type MenuItemCreateNestedOneWithoutOrderItemsInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutOrderItemsInput, Prisma.MenuItemUncheckedCreateWithoutOrderItemsInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutOrderItemsInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+}
+
+export type MenuItemUpdateOneRequiredWithoutOrderItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.MenuItemCreateWithoutOrderItemsInput, Prisma.MenuItemUncheckedCreateWithoutOrderItemsInput>
+  connectOrCreate?: Prisma.MenuItemCreateOrConnectWithoutOrderItemsInput
+  upsert?: Prisma.MenuItemUpsertWithoutOrderItemsInput
+  connect?: Prisma.MenuItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MenuItemUpdateToOneWithWhereWithoutOrderItemsInput, Prisma.MenuItemUpdateWithoutOrderItemsInput>, Prisma.MenuItemUncheckedUpdateWithoutOrderItemsInput>
+}
+
 export type MenuItemCreateWithoutCafeteriaInput = {
   id?: string
   name: string
@@ -515,6 +541,7 @@ export type MenuItemCreateWithoutCafeteriaInput = {
   isAvailable?: boolean
   allergenTags?: Prisma.MenuItemCreateallergenTagsInput | string[]
   imageUrl?: string | null
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemUncheckedCreateWithoutCafeteriaInput = {
@@ -526,6 +553,7 @@ export type MenuItemUncheckedCreateWithoutCafeteriaInput = {
   isAvailable?: boolean
   allergenTags?: Prisma.MenuItemCreateallergenTagsInput | string[]
   imageUrl?: string | null
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type MenuItemCreateOrConnectWithoutCafeteriaInput = {
@@ -569,6 +597,70 @@ export type MenuItemScalarWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"MenuItem"> | string | null
 }
 
+export type MenuItemCreateWithoutOrderItemsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  price: number
+  category: string
+  isAvailable?: boolean
+  allergenTags?: Prisma.MenuItemCreateallergenTagsInput | string[]
+  imageUrl?: string | null
+  cafeteria: Prisma.CafeteriaCreateNestedOneWithoutMenuItemsInput
+}
+
+export type MenuItemUncheckedCreateWithoutOrderItemsInput = {
+  id?: string
+  cafeteriaId: string
+  name: string
+  description?: string | null
+  price: number
+  category: string
+  isAvailable?: boolean
+  allergenTags?: Prisma.MenuItemCreateallergenTagsInput | string[]
+  imageUrl?: string | null
+}
+
+export type MenuItemCreateOrConnectWithoutOrderItemsInput = {
+  where: Prisma.MenuItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutOrderItemsInput, Prisma.MenuItemUncheckedCreateWithoutOrderItemsInput>
+}
+
+export type MenuItemUpsertWithoutOrderItemsInput = {
+  update: Prisma.XOR<Prisma.MenuItemUpdateWithoutOrderItemsInput, Prisma.MenuItemUncheckedUpdateWithoutOrderItemsInput>
+  create: Prisma.XOR<Prisma.MenuItemCreateWithoutOrderItemsInput, Prisma.MenuItemUncheckedCreateWithoutOrderItemsInput>
+  where?: Prisma.MenuItemWhereInput
+}
+
+export type MenuItemUpdateToOneWithWhereWithoutOrderItemsInput = {
+  where?: Prisma.MenuItemWhereInput
+  data: Prisma.XOR<Prisma.MenuItemUpdateWithoutOrderItemsInput, Prisma.MenuItemUncheckedUpdateWithoutOrderItemsInput>
+}
+
+export type MenuItemUpdateWithoutOrderItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allergenTags?: Prisma.MenuItemUpdateallergenTagsInput | string[]
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cafeteria?: Prisma.CafeteriaUpdateOneRequiredWithoutMenuItemsNestedInput
+}
+
+export type MenuItemUncheckedUpdateWithoutOrderItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cafeteriaId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.FloatFieldUpdateOperationsInput | number
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allergenTags?: Prisma.MenuItemUpdateallergenTagsInput | string[]
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
 export type MenuItemCreateManyCafeteriaInput = {
   id?: string
   name: string
@@ -589,6 +681,7 @@ export type MenuItemUpdateWithoutCafeteriaInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allergenTags?: Prisma.MenuItemUpdateallergenTagsInput | string[]
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderItems?: Prisma.OrderItemUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateWithoutCafeteriaInput = {
@@ -600,6 +693,7 @@ export type MenuItemUncheckedUpdateWithoutCafeteriaInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allergenTags?: Prisma.MenuItemUpdateallergenTagsInput | string[]
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type MenuItemUncheckedUpdateManyWithoutCafeteriaInput = {
@@ -614,6 +708,35 @@ export type MenuItemUncheckedUpdateManyWithoutCafeteriaInput = {
 }
 
 
+/**
+ * Count Type MenuItemCountOutputType
+ */
+
+export type MenuItemCountOutputType = {
+  orderItems: number
+}
+
+export type MenuItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  orderItems?: boolean | MenuItemCountOutputTypeCountOrderItemsArgs
+}
+
+/**
+ * MenuItemCountOutputType without action
+ */
+export type MenuItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MenuItemCountOutputType
+   */
+  select?: Prisma.MenuItemCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MenuItemCountOutputType without action
+ */
+export type MenuItemCountOutputTypeCountOrderItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderItemWhereInput
+}
+
 
 export type MenuItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -625,7 +748,9 @@ export type MenuItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   isAvailable?: boolean
   allergenTags?: boolean
   imageUrl?: boolean
+  orderItems?: boolean | Prisma.MenuItem$orderItemsArgs<ExtArgs>
   cafeteria?: boolean | Prisma.CafeteriaDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.MenuItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["menuItem"]>
 
 export type MenuItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -668,7 +793,9 @@ export type MenuItemSelectScalar = {
 
 export type MenuItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cafeteriaId" | "name" | "description" | "price" | "category" | "isAvailable" | "allergenTags" | "imageUrl", ExtArgs["result"]["menuItem"]>
 export type MenuItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  orderItems?: boolean | Prisma.MenuItem$orderItemsArgs<ExtArgs>
   cafeteria?: boolean | Prisma.CafeteriaDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.MenuItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MenuItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cafeteria?: boolean | Prisma.CafeteriaDefaultArgs<ExtArgs>
@@ -680,6 +807,7 @@ export type MenuItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $MenuItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MenuItem"
   objects: {
+    orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
     cafeteria: Prisma.$CafeteriaPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1086,6 +1214,7 @@ readonly fields: MenuItemFieldRefs;
  */
 export interface Prisma__MenuItemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  orderItems<T extends Prisma.MenuItem$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MenuItem$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cafeteria<T extends Prisma.CafeteriaDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CafeteriaDefaultArgs<ExtArgs>>): Prisma.Prisma__CafeteriaClient<runtime.Types.Result.GetResult<Prisma.$CafeteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1523,6 +1652,30 @@ export type MenuItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many MenuItems to delete.
    */
   limit?: number
+}
+
+/**
+ * MenuItem.orderItems
+ */
+export type MenuItem$orderItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderItem
+   */
+  select?: Prisma.OrderItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderItem
+   */
+  omit?: Prisma.OrderItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderItemInclude<ExtArgs> | null
+  where?: Prisma.OrderItemWhereInput
+  orderBy?: Prisma.OrderItemOrderByWithRelationInput | Prisma.OrderItemOrderByWithRelationInput[]
+  cursor?: Prisma.OrderItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderItemScalarFieldEnum | Prisma.OrderItemScalarFieldEnum[]
 }
 
 /**

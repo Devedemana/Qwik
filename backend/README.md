@@ -1,5 +1,6 @@
 # Core Endpoint Features:
-## ✔️ (I.) Cafetaria Merchant - Features  
+
+## ✔️ (I.) CAFETERIA MERCHANT -FEATURES 
 ---
 ### 1. Cafeteria Status Management
 
@@ -72,9 +73,9 @@ The "State Machine" that moves a single order through the kitchen process.
 
 ```
 
-### 5. Order Lifecycle Transitions
+### 5. Order Complete verification
 
-The "State Machine" that moves a single order through the kitchen process.
+The "qrverifications enginer" that verifies that user completed the order  .
 
 * **Endpoint:** `PATCH /api/merchant/order/verify`
 * **Controller Method:** `verifyPickupOrder`
@@ -86,7 +87,7 @@ The "State Machine" that moves a single order through the kitchen process.
 }
 
 ```
-* **Impact:** Verifies the supplied qrCodeSecret associated with an order and completes the order when the order status is `READY`, this emits real-time notification so customer.
+* **Impact:** Verifies the supplied qrCodeSecret associated with an order and completes the order when the order status is `READY`, this emits real-time notification to customer.
 
 ---
 
@@ -104,7 +105,7 @@ The "State Machine" that moves a single order through the kitchen process.
 
 
 
-## (II.) Student & Authentication - Features 
+## (II.) STUDENT & AUTHENTICATION - FEATURES
 ---
 
 ### ✔️ 1. User Authentication (Registration & Login)
@@ -114,15 +115,17 @@ Used to onboard users (Students/Staff) and provide secure access to the platform
 * **Endpoints:** `POST /api/auth/register`, `POST /api/auth/login`
 * **Controller Method:** `register`, `login`
 * **Payload (Body):**
+
 ```json
 {
   "email": "student.name@ashesi.edu.gh",
   "password": "securepassword123",
-  "name": "Daniel Kpatamia"
+  "name": "Daniel Kpatamia",
+  "role": "CUSTOMER"
 }
 ```
 
-* **Impact:** Creates a user record in Postgres and returns a token. Sets the foundation for Role-Based Access Control (RBAC).
+* **Impact:** Onboards a user (signup & login). Sets the foundation for Role-Based Access Control (RBAC).
 
 ---
 
@@ -130,22 +133,25 @@ Used to onboard users (Students/Staff) and provide secure access to the platform
 
 Allows customers to view all campus cafeterias, their live busy status, and their specific menu offerings.
 
-* **Endpoints:** `GET /api/cafeterias`, `GET /api/cafeterias/:id/menu`
+* **Endpoints:** `GET /api/cafeterias`,    `GET /api/cafeterias/:id/menu`
 * **Controller Method:** `getCafeterias`, `getMenu`
 * **Parameters:** `id` (Cafeteria UUID)
-* **Logic:** Fetches cafeterias including their `capacityStatus` and `isOpen` boolean. Filters menu items by `isAvailable: true`.
+* **Logic:** 
+- Fetches cafeterias including their `capacityStatus` and `isOpen` boolean. 
+- Filters menu items by `isAvailable: true` for a cafeteria .
+
 
 * **Endpoints:** `POST/api/cafeterias/`
 * **Controller Method:** `createCafeteria` 
 * **Parameters:** `userId`, `status`,  `name` 
-* **Logic:** Creates a cafetaria: action to be performed by only ADMIN privilleges 
+* **Logic:** Creates a cafetaria: action to be performed only by ADMIN privilleges 
 ---
 
-### 3. Order Placement (Checkout)
+### 3.Order Placement (Checkout)
 
 The core transaction where a student selects food items and schedules a pickup window.
 
-* **Endpoint:** `POST /api/orders`
+* **Endpoint:** `POST /api/orders/order`
 * **Controller Method:** `createOrder`
 * **Payload (Body):**
 ```json
@@ -155,6 +161,7 @@ The core transaction where a student selects food items and schedules a pickup w
     { "menuItemId": "uuid-1", "quantity": 2 },
     { "menuItemId": "uuid-2", "quantity": 1 }
   ],
+  "totalAmount": 400.30
   "pickupWindow": "2026-03-17T12:30:00Z"
 }
 ```
@@ -164,13 +171,14 @@ The core transaction where a student selects food items and schedules a pickup w
 ---
 
 ### 4. Personal Order History
-Allows students to track their current active orders and view past purchases.
+Allows customers to track their current active orders and view past purchases.
 
 * **Endpoint:** `GET /api/orders/my-history`
 * **Controller Method:** `getUserOrders`
 * **Logic:** Returns all orders associated with the logged-in user's ID, sorted by the most recent. Includes the `qrCodeSecret` for active orders to be rendered as QR codes.
 
 ---
+
 
 ### 5. Dietary & Allergy Profile
 
