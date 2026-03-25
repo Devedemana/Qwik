@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'oder_tracking.dart';
 
 class PaymentPage extends StatelessWidget {
   const PaymentPage({super.key});
@@ -42,7 +43,12 @@ class PaymentPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const OrderTrackingPage()),
+                );
+              },
               child: const Text("Payment"),
             )
           ],
