@@ -1,8 +1,56 @@
 import 'package:flutter/material.dart';
-import 'success_screen.dart';
+import '../services/auth_service.dart';
+import '../screens/home_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Please enter username and password');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final success = await AuthService.login(username, password);
+
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      setState(() => _errorMessage = 'Invalid username or password');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +79,7 @@ class LoginScreen extends StatelessWidget {
                 shadows: [
                   Shadow(
                     blurRadius: 8,
-                    color: Colors.brown.withOpacity(0.5),
+                    color: Colors.brown.withValues(alpha: 0.5),
                     offset: const Offset(2, 2),
                   ),
                 ],
@@ -55,10 +103,18 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  _inputField("UserName"),
+                  _inputField("UserName", controller: _usernameController),
                   const SizedBox(height: 16),
-                  _inputField("Password", obscure: true),
+                  _inputField("Password", controller: _passwordController, obscure: true),
                   const SizedBox(height: 8),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Color(0xFFFFD700), fontSize: 14),
+                      ),
+                    ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -88,15 +144,18 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const SuccessScreen()),
-                      );
-                    },
-                    child: const Text("Login",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                    onPressed: _isLoading ? null : _handleLogin,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text("Login",
+                            style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
                 ],
               ),
@@ -107,8 +166,12 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _inputField(String hint, {bool obscure = false}) {
+  Widget _inputField(String hint, {
+    required TextEditingController controller,
+    bool obscure = false,
+  }) {
     return TextField(
+      controller: controller,
       obscureText: obscure,
       decoration: InputDecoration(
         hintText: hint,
