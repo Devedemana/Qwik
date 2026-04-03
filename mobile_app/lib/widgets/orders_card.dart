@@ -4,6 +4,7 @@ import '../utils/app_colors.dart';
 import '../models/cart_item.dart';
 import '../widgets/cart_item_card.dart';
 import '../widgets/order_summary.dart';
+import '../Frontend/success_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -91,7 +92,12 @@ class _CartScreenState extends State<CartScreen> {
         width: double.infinity,
         height: 58,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SuccessScreen()),
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.darkBrown,
             foregroundColor: Colors.white,
