@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   // 10.0.2.2 = Android emulator → host localhost
   // localhost = Windows desktop / web / physical device on same network
-  static const String baseUrl = 'http://localhost:3001';
+  static const String baseUrl = 'https://qwik-production-1b55.up.railway.app';
 
   static const _keyToken = 'auth_token';
 
