@@ -17,4 +17,4 @@ COPY . .
 
 EXPOSE $PORT
 
-CMD npx prisma db push && npm start
+CMD sh -c "npx prisma db push; npm start"
