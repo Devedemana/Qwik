@@ -15,6 +15,6 @@ RUN npx prisma generate
 # Copy source
 COPY . .
 
-EXPOSE 3001
+EXPOSE $PORT
 
 CMD npx prisma db push && npm start
