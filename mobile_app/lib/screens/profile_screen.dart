@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../services/auth_service.dart';
+import '../services/order_service.dart';
+import '../services/api_service.dart';
+import '../models/order.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user.dart';
 import '../Frontend/login_screen.dart';
+import '../Frontend/oder_tracking.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,21 +18,85 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _editProfileExpanded = false;
-  bool _invoicesExpanded = false;
+  bool _ordersExpanded = false;
   bool _paymentDetailsExpanded = false;
 
-  String _username = '';
+  AppUser? _user;
+  List<Order> _orders = [];
+  bool _loadingOrders = false;
+  bool _savingProfile = false;
+
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _emailCtrl;
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _nameCtrl = TextEditingController();
+    _emailCtrl = TextEditingController();
+    _loadUser();
   }
 
-  Future<void> _loadUsername() async {
-    final name = await AuthService.getUsername();
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.getCurrentUser();
     if (mounted) {
-      setState(() => _username = name);
+      setState(() {
+        _user = user;
+        _nameCtrl.text = user?.name ?? '';
+        _emailCtrl.text = user?.email ?? '';
+      });
+    }
+  }
+
+  Future<void> _loadOrders() async {
+    if (_loadingOrders) return;
+    setState(() => _loadingOrders = true);
+    try {
+      final orders = await OrderService.getUserOrders();
+      if (mounted) setState(() => _orders = orders);
+    } catch (e) {
+      if (mounted && ApiService.isUnauthorized(e)) {
+        setState(() => _orders = []);
+      }
+    } finally {
+      if (mounted) setState(() => _loadingOrders = false);
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    final name = _nameCtrl.text.trim();
+    if (name.isEmpty) return;
+    setState(() => _savingProfile = true);
+    try {
+      await ApiService.patch('/api/user/profile', {'name': name}, auth: true);
+      // Update cached name in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_name', name);
+      if (mounted) {
+        setState(() {
+          _user = _user != null
+              ? AppUser(id: _user!.id, name: name, email: _user!.email, role: _user!.role)
+              : null;
+          _savingProfile = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _savingProfile = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e')),
+        );
+      }
     }
   }
 
@@ -56,21 +126,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildAvatar(),
                 const SizedBox(height: 20),
                 Text(
-                  _username.isNotEmpty ? _username : 'User',
+                  _user?.name ?? 'User',
                   style: const TextStyle(
                     color: AppColors.darkBrown,
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Student',
-                  style: TextStyle(
-                    color: AppColors.subtext,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
+                  _user?.email ?? '',
+                  style: const TextStyle(color: AppColors.subtext, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.rust.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _user?.role ?? '',
+                    style: const TextStyle(
+                        color: AppColors.rust, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(height: 36),
@@ -78,26 +156,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.edit_outlined,
                   label: 'Edit Profile',
                   isExpanded: _editProfileExpanded,
-                  onTap: () => setState(
-                      () => _editProfileExpanded = !_editProfileExpanded),
+                  onTap: () => setState(() => _editProfileExpanded = !_editProfileExpanded),
                   content: _editProfileContent(),
                 ),
                 const SizedBox(height: 14),
                 _buildAccordionItem(
                   icon: Icons.receipt_long_outlined,
-                  label: 'Invoices',
-                  isExpanded: _invoicesExpanded,
-                  onTap: () =>
-                      setState(() => _invoicesExpanded = !_invoicesExpanded),
-                  content: _invoicesContent(),
+                  label: 'Order History',
+                  isExpanded: _ordersExpanded,
+                  onTap: () {
+                    setState(() => _ordersExpanded = !_ordersExpanded);
+                    if (_ordersExpanded && _orders.isEmpty) _loadOrders();
+                  },
+                  content: _ordersContent(),
                 ),
                 const SizedBox(height: 14),
                 _buildAccordionItem(
                   icon: Icons.credit_card_outlined,
                   label: 'Payment Details',
                   isExpanded: _paymentDetailsExpanded,
-                  onTap: () => setState(
-                      () => _paymentDetailsExpanded = !_paymentDetailsExpanded),
+                  onTap: () =>
+                      setState(() => _paymentDetailsExpanded = !_paymentDetailsExpanded),
                   content: _paymentContent(),
                 ),
                 const SizedBox(height: 28),
@@ -117,14 +196,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(width: 46),
         Expanded(
           child: Center(
-            child: Text(
-              'Profile',
-              style: TextStyle(
-                color: AppColors.darkBrown,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: Text('Profile',
+                style: TextStyle(
+                    color: AppColors.darkBrown,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600)),
           ),
         ),
         SizedBox(width: 46),
@@ -134,17 +210,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildAvatar() {
     return Container(
-      width: 180,
-      height: 180,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.background,
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: const Icon(
-        Icons.person,
-        size: 80,
-        color: AppColors.subtext,
+      width: 100,
+      height: 100,
+      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.rust),
+      child: Center(
+        child: Text(
+          _user != null && _user!.name.isNotEmpty ? _user!.name[0].toUpperCase() : '?',
+          style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -159,10 +232,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeInOut,
-      decoration: BoxDecoration(
-        color: AppColors.rust,
-        borderRadius: BorderRadius.circular(18),
-      ),
+      decoration:
+          BoxDecoration(color: AppColors.rust, borderRadius: BorderRadius.circular(18)),
       child: Column(
         children: [
           GestureDetector(
@@ -183,23 +254,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: Text(
-                      label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: Text(label,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600)),
                   ),
                   AnimatedRotation(
                     turns: isExpanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 280),
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white,
-                      size: 26,
-                    ),
+                    child: const Icon(Icons.keyboard_arrow_down,
+                        color: Colors.white, size: 26),
                   ),
                 ],
               ),
@@ -207,9 +272,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 280),
-            crossFadeState: isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
+            crossFadeState:
+                isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Container(
               width: double.infinity,
@@ -225,99 +289,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _editProfileContent() {
     return Column(
       children: [
-        _profileField('Full Name', _username),
+        _profileField('Full Name', _nameCtrl),
         const SizedBox(height: 10),
-        _profileField('Email', ''),
-        const SizedBox(height: 10),
-        _profileField('Phone', ''),
+        _profileField('Email', _emailCtrl, enabled: false),
         const SizedBox(height: 14),
-        _saveButton('Save Changes'),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _savingProfile ? null : _saveProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.rust,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              elevation: 0,
+            ),
+            child: _savingProfile
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.rust))
+                : const Text('Save Changes',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _invoicesContent() {
+  Widget _ordersContent() {
+    if (_loadingOrders) {
+      return const Center(
+          child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(color: Colors.white)));
+    }
+    if (_orders.isEmpty) {
+      return const Text('No orders yet', style: TextStyle(color: Colors.white70));
+    }
     return Column(
-      children: [
-        _invoiceRow('INV-001', 'Mar 10, 2026', '\$320.00'),
-        _divider(),
-        _invoiceRow('INV-002', 'Feb 18, 2026', '\$540.00'),
-        _divider(),
-        _invoiceRow('INV-003', 'Jan 05, 2026', '\$210.00'),
-      ],
+      children: _orders.take(5).map((o) {
+        return GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => OrderTrackingPage(order: o)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(o.cafeteriaName,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13)),
+                      Text(o.statusDisplay,
+                          style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
+                    ],
+                  ),
+                ),
+                Text('₵${o.totalAmount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 6),
+                const Icon(Icons.chevron_right, color: Colors.white54, size: 18),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
   Widget _paymentContent() {
-    return Column(
-      children: [
-        _profileField('Card Number', '**** **** **** 4242'),
-        const SizedBox(height: 10),
-        _profileField('Expiry', '08 / 28'),
-        const SizedBox(height: 14),
-        _saveButton('Update Payment'),
-      ],
+    return const Text(
+      'Payment method management coming soon.',
+      style: TextStyle(color: Colors.white70, fontSize: 13),
     );
   }
 
-  Widget _profileField(String hint, String value) {
+  Widget _profileField(String hint, TextEditingController ctrl, {bool enabled = true}) {
     return TextField(
-      style: const TextStyle(color: Colors.white, fontSize: 14),
+      controller: ctrl,
+      enabled: enabled,
+      style: TextStyle(color: enabled ? Colors.white : Colors.white54, fontSize: 14),
       decoration: InputDecoration(
         labelText: hint,
-        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 13),
+        labelStyle:
+            TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 13),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.12),
+        fillColor: Colors.white.withValues(alpha: enabled ? 0.12 : 0.06),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
+            borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
         isDense: true,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      ),
-      controller: TextEditingController(text: value),
-    );
-  }
-
-  Widget _invoiceRow(String id, String date, String amount) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Text(id,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(date,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
-          ),
-          Text(amount,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-
-  Widget _divider() => Divider(color: Colors.white.withValues(alpha: 0.2), height: 1);
-
-  Widget _saveButton(String label) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: AppColors.rust,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          elevation: 0,
-        ),
-        child: Text(label,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
       ),
     );
   }
@@ -330,20 +402,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.darkBrown,
           foregroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           padding: const EdgeInsets.symmetric(vertical: 20),
           elevation: 0,
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
-        child: const Text(
-          'Logout',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.4,
-          ),
-        ),
+        child: const Text('Logout',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
     );
   }

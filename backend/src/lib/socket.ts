@@ -11,7 +11,11 @@ export const initSocket = (server: HttpServer) => {
 
   io.on('connection', (socket) => {
     socket.on('join_cafeteria', (cafeteriaId) => {
-    socket.join(`cafeteria:${cafeteriaId}`);
+      socket.join(`cafeteria:${cafeteriaId}`);
+    });
+    // User joins their own room to receive order status push events
+    socket.on('join_user', (userId: string) => {
+      socket.join(`user:${userId}`);
     });
   });
 

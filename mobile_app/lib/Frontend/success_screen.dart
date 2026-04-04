@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'payment.dart';
+import '../models/order.dart';
+import 'oder_tracking.dart';
 
 class SuccessScreen extends StatelessWidget {
-  const SuccessScreen({super.key});
+  final Order order;
+  const SuccessScreen({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -29,31 +31,40 @@ class SuccessScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    "SUCCESS !",
+                    'Order Placed!',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+                  Text(
+                    '₵${order.totalAmount.toStringAsFixed(2)} at ${order.cafeteriaName}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFD700),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      minimumSize: const Size(150, 45),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      minimumSize: const Size(180, 48),
                     ),
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const PaymentPage()),
+                        MaterialPageRoute(builder: (_) => OrderTrackingPage(order: order)),
                       );
                     },
-                    child: const Text("Proceed to Payment",
-                        style: TextStyle(color: Colors.white)),
+                    child: const Text('Track Order', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
+                    child: const Text('Back to Home', style: TextStyle(color: Colors.white70)),
                   ),
                 ],
               ),

@@ -34,6 +34,7 @@ model Cafeteria {
   name           String         @unique
   isOpen         Boolean        @default(true)
   capacityStatus CapacityStatus @default(GREEN)
+  imageUrl       String?
   menuItems      MenuItem[]
   orders         Order[]
 }
@@ -85,6 +86,18 @@ model OrderItem {
   quantity   Int
 
   order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Special {
+  id        String   @id @default(uuid())
+  tag       String
+  title     String
+  subtitle  String
+  imageUrl  String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 enum OrderStatus {

@@ -55,7 +55,8 @@ export const ModelName = {
   Cafeteria: 'Cafeteria',
   MenuItem: 'MenuItem',
   Order: 'Order',
-  OrderItem: 'OrderItem'
+  OrderItem: 'OrderItem',
+  Special: 'Special'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -92,7 +93,8 @@ export const CafeteriaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   isOpen: 'isOpen',
-  capacityStatus: 'capacityStatus'
+  capacityStatus: 'capacityStatus',
+  imageUrl: 'imageUrl'
 } as const
 
 export type CafeteriaScalarFieldEnum = (typeof CafeteriaScalarFieldEnum)[keyof typeof CafeteriaScalarFieldEnum]
@@ -139,6 +141,21 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const SpecialScalarFieldEnum = {
+  id: 'id',
+  tag: 'tag',
+  title: 'title',
+  subtitle: 'subtitle',
+  imageUrl: 'imageUrl',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isActive: 'isActive',
+  createdAt: 'createdAt'
+} as const
+
+export type SpecialScalarFieldEnum = (typeof SpecialScalarFieldEnum)[keyof typeof SpecialScalarFieldEnum]
 
 
 export const SortOrder = {

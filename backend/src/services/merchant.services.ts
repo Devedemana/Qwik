@@ -1,10 +1,10 @@
 import { prisma } from "../lib/index.ts";
-import { emitUpdate } from "lib/socket.ts";
-import { OrderStatus } from "../../prisma/generated/prisma/enums.ts";
+import { emitUpdate } from "../lib/socket.ts";
+import { CapacityStatus, OrderStatus } from "../../prisma/generated/prisma/enums.ts";
 
 export const MerchantService = {
-  async updateCafeteriaStatus(cafeteriaId: string, status: string) {
-    const updatedCafeteria = await prisma.cafetaria.update({
+  async updateCafeteriaStatus(cafeteriaId: string, status: CapacityStatus) {
+    const updatedCafeteria = await prisma.cafeteria.update({
       where: { id: cafeteriaId },
       data: { capacityStatus: status },
     });
@@ -36,7 +36,7 @@ export const MerchantService = {
     return await prisma.order.findMany({
       where: {
         cafeteriaId,
-        status: { in: ["PAID", "PREPPING", "READY"] },
+        status: { in: ["RECEIVED", "PREPPING", "READY"] },
       },
       orderBy: { createdAt: "asc" },
     });
@@ -51,13 +51,50 @@ export const MerchantService = {
     this.validateTransition(currentOrder?.status, nextStatus);
     const updated = await prisma.order.update({
       where: { id: orderId },
-      data: { status: nextStatus }
+      data: { status: nextStatus },
+      include: { cafeteria: { select: { name: true } } },
     });
 
-    emitUpdate(`order:${orderId}`, 'order_status_update', { status: nextStatus });
+    const payload = {
+      orderId,
+      status: nextStatus,
+      cafeteriaName: (updated as any).cafeteria?.name ?? '',
+    };
+    emitUpdate(`order:${orderId}`, 'order_status_update', payload);
+    // Also push to the user's personal room so their device gets notified
+    emitUpdate(`user:${currentOrder!.userId}`, 'order_status_update', payload);
     return updated;
   },
   
+
+  // Menu CRUD (ADMIN only)
+  async addMenuItem(data: {
+    cafeteriaId: string;
+    name: string;
+    price: number;
+    category: string;
+    description?: string;
+    allergenTags?: string[];
+    imageUrl?: string;
+  }) {
+    return await prisma.menuItem.create({ data });
+  },
+
+  async updateMenuItem(id: string, data: {
+    name?: string;
+    price?: number;
+    category?: string;
+    description?: string;
+    allergenTags?: string[];
+    imageUrl?: string;
+    isAvailable?: boolean;
+  }) {
+    return await prisma.menuItem.update({ where: { id }, data });
+  },
+
+  async deleteMenuItem(id: string) {
+    return await prisma.menuItem.delete({ where: { id } });
+  },
 
   // 1. Pure Logic for Staff Discount
   calculateStaffPrice(price: number): number {
