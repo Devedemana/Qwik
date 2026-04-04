@@ -12,8 +12,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "build": "tsc",
-    "start": "node src/index.ts",
-    "seed": "tsx prisma/seed.ts"
+    "start": "tsx src/index.ts",
+    "seed": "tsx prisma/seed.ts",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
