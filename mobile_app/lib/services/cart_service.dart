@@ -29,10 +29,15 @@ class CartService extends ChangeNotifier {
   double get deliveryFee => isEmpty ? 0 : 6.0;
   double get total => subtotal + taxes + deliveryFee;
 
-  void addItem(FoodItem item, {String? cafeteriaId, String? cafeteriaName}) {
-    // If adding from a different cafeteria, clear cart first
-    if (_cafeteriaId != null && cafeteriaId != null && _cafeteriaId != cafeteriaId) {
+  /// Returns true if the item was added, false if there is a cafeteria conflict.
+  /// When [clearAndAdd] is true, the existing cart is cleared before adding.
+  bool addItem(FoodItem item, {String? cafeteriaId, String? cafeteriaName, bool clearAndAdd = false}) {
+    final hasConflict = _cafeteriaId != null && cafeteriaId != null && _cafeteriaId != cafeteriaId;
+    if (hasConflict && !clearAndAdd) return false;
+    if (hasConflict && clearAndAdd) {
       _entries.clear();
+      _cafeteriaId = null;
+      _cafeteriaName = null;
     }
     _cafeteriaId ??= cafeteriaId;
     _cafeteriaName ??= cafeteriaName;
@@ -44,6 +49,7 @@ class CartService extends ChangeNotifier {
       _entries.add(CartEntry(item: item));
     }
     notifyListeners();
+    return true;
   }
 
   void increment(String itemId) {

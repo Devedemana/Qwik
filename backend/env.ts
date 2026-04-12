@@ -23,6 +23,11 @@ export const envSchema = z.object({
   BCRYPT_ROUNDS: z.coerce.number().min(12).default(12),
   BECRYPT_ROTATE: z.coerce.number().min(10).max(12).default(10),
   IMAGE_BASE_URL: z.string().url().default('http://localhost:3001'),
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default('Qwik <no-reply@qwik.app>'),
 });
 // export envschema type
 export type Env = z.infer<typeof envSchema>;

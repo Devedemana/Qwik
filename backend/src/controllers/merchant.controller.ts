@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { MerchantService } from '../services/merchant.services.ts';
+import { AnalyticsService } from '../services/analytics.service.ts';
 
 export const MerchantController = {
   // 1. PATCH /api/merchant/status
@@ -83,6 +84,16 @@ export const MerchantController = {
       return res.status(200).json({ success: true });
     } catch (error) {
       return res.status(500).json({ success: false, error: 'Failed to delete menu item' });
+    }
+  },
+
+  // 8. GET /api/merchant/analytics/:cafeteriaId  (ADMIN only)
+  async getAnalytics(req: Request, res: Response) {
+    try {
+      const data = await AnalyticsService.getCafeteriaAnalytics(req.params.cafeteriaId as string);
+      return res.status(200).json({ success: true, data });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: 'Failed to fetch analytics' });
     }
   },
 };

@@ -5,6 +5,7 @@ import '../models/cafeteria.dart';
 import '../models/food_item.dart';
 import '../services/cafeteria_service.dart';
 import '../services/cart_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/food_card.dart';
 
 class CafeteriaScreen extends StatefulWidget {
@@ -23,12 +24,22 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
   final _searchController = TextEditingController();
   List<FoodItem> _searchResults = [];
   bool _searching = false;
+  List<String> _userAllergies = [];
+  bool _hideAllergens = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.cafeterias.isNotEmpty) {
       _selectCafeteria(widget.cafeterias.first);
+    }
+    _loadUserAllergies();
+  }
+
+  Future<void> _loadUserAllergies() async {
+    final user = await AuthService.getCurrentUser();
+    if (mounted && (user?.allergies.isNotEmpty ?? false)) {
+      setState(() => _userAllergies = user!.allergies);
     }
   }
 
@@ -85,7 +96,14 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final displayItems = _searching ? _searchResults : _menuItems;
+    var displayItems = _searching ? _searchResults : _menuItems;
+    if (_hideAllergens && _userAllergies.isNotEmpty) {
+      displayItems = displayItems.where((item) =>
+        !item.allergenTags.any((tag) =>
+          _userAllergies.any((a) => a.toLowerCase() == tag.toLowerCase())
+        )
+      ).toList();
+    }
 
     return SafeArea(
       child: Column(
@@ -93,13 +111,45 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              'Menu',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: AppColors.darkBrown,
-              ),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkBrown,
+                    ),
+                  ),
+                ),
+                if (_userAllergies.isNotEmpty)
+                  GestureDetector(
+                    onTap: () => setState(() => _hideAllergens = !_hideAllergens),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _hideAllergens ? AppColors.rust : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.rust),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.no_meals_outlined, size: 14,
+                              color: _hideAllergens ? Colors.white : AppColors.rust),
+                          const SizedBox(width: 4),
+                          Text('Hide Allergens',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _hideAllergens ? Colors.white : AppColors.rust,
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -209,21 +259,56 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
           final item = items[index];
           return FoodCard(
             item: item,
-            onAddToCart: () {
+            onAddToCart: () async {
               final cafeteria = widget.cafeterias
                   .where((c) => c.id == item.cafeteriaId)
                   .firstOrNull;
-              context.read<CartService>().addItem(
+              final cart = context.read<CartService>();
+              final added = cart.addItem(
+                item,
+                cafeteriaId: item.cafeteriaId,
+                cafeteriaName: cafeteria?.name,
+              );
+              if (!added) {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Start a new cart?'),
+                    content: Text(
+                      'You already have items from ${cart.cafeteriaName}. '
+                      'Adding this item will clear your current cart.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Keep current cart'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Start new cart'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  cart.addItem(
                     item,
                     cafeteriaId: item.cafeteriaId,
                     cafeteriaName: cafeteria?.name,
+                    clearAndAdd: true,
                   );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${item.name} added to cart'),
-                  duration: const Duration(seconds: 1),
-                ),
-              );
+                } else {
+                  return;
+                }
+              }
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${item.name} added to cart'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              }
             },
           );
         },

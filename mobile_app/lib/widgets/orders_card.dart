@@ -5,9 +5,11 @@ import '../services/cart_service.dart';
 import '../widgets/cart_item_card.dart';
 import '../widgets/order_summary.dart';
 import '../Frontend/payment.dart';
+import '../Frontend/login_screen.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+  final bool isGuest;
+  const CartScreen({super.key, this.isGuest = false});
 
   @override
   Widget build(BuildContext context) {
@@ -108,15 +110,43 @@ class CartScreen extends StatelessWidget {
         width: double.infinity,
         height: 58,
         child: ElevatedButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChangeNotifierProvider.value(
-                value: cart,
-                child: const PaymentPage(),
+          onPressed: () {
+            if (isGuest) {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Login required'),
+                  content: const Text('You need an account to place orders. Sign in or register to continue.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      child: const Text('Login / Register'),
+                    ),
+                  ],
+                ),
+              );
+              return;
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ChangeNotifierProvider.value(
+                  value: cart,
+                  child: const PaymentPage(),
+                ),
               ),
-            ),
-          ),
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.darkBrown,
             foregroundColor: Colors.white,

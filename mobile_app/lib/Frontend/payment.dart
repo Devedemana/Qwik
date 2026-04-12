@@ -5,7 +5,6 @@ import '../services/cart_service.dart';
 import '../services/order_service.dart';
 import '../services/notification_service.dart';
 import '../utils/app_colors.dart';
-import '../utils/meal_period.dart';
 import 'oder_tracking.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -37,21 +36,11 @@ class _PaymentPageState extends State<PaymentPage> {
     }
 
     // Meal Plan and Cash On Pickup — place order, pay at cafeteria
-    final pickupWindow = MealPeriodHelper.pickupWindow();
-    if (pickupWindow == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cafeteria is closed. Hours: Breakfast 8–10am, Lunch & Dinner 10am–8pm.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
     setState(() => _isPlacing = true);
     try {
       final order = await OrderService.createOrder(
         cafeteriaId: cart.cafeteriaId!,
-        pickupWindow: pickupWindow,
+        pickupWindow: DateTime.now().add(const Duration(minutes: 30)),
         items: cart.toOrderItems(),
       );
 
@@ -101,22 +90,11 @@ class _PaymentPageState extends State<PaymentPage> {
 
     if (confirmed != true || !mounted) return;
 
-    final pickupWindow = MealPeriodHelper.pickupWindow();
-    if (pickupWindow == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cafeteria is closed. Hours: Breakfast 8–10am, Lunch & Dinner 10am–8pm.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() => _isPlacing = true);
     try {
       final order = await OrderService.createOrder(
         cafeteriaId: cart.cafeteriaId!,
-        pickupWindow: pickupWindow,
+        pickupWindow: DateTime.now().add(const Duration(minutes: 30)),
         items: cart.toOrderItems(),
       );
 
@@ -126,10 +104,10 @@ class _PaymentPageState extends State<PaymentPage> {
 
       cart.clear();
 
-      // Open MTN MoMo dialer
-      final uri = Uri.parse('tel:*170%23');
+      // Open MTN MoMo dialer — use Uri.fromParts so # is not re-encoded
+      final uri = Uri(scheme: 'tel', path: '*170#');
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
 
       if (!mounted) return;

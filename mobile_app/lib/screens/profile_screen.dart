@@ -20,20 +20,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _editProfileExpanded = false;
   bool _ordersExpanded = false;
   bool _paymentDetailsExpanded = false;
+  bool _preferencesExpanded = false;
 
   AppUser? _user;
   List<Order> _orders = [];
   bool _loadingOrders = false;
   bool _savingProfile = false;
+  bool _savingPreferences = false;
 
   late final TextEditingController _nameCtrl;
   late final TextEditingController _emailCtrl;
+  late final TextEditingController _allergiesCtrl;
+
+  static const _dietaryOptions = [
+    'Vegetarian', 'Vegan', 'Pescatarian', 'Halal', 'Gluten-Free', 'Dairy-Free',
+  ];
+  List<String> _selectedDietary = [];
 
   @override
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController();
     _emailCtrl = TextEditingController();
+    _allergiesCtrl = TextEditingController();
     _loadUser();
   }
 
@@ -41,17 +50,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
+    _allergiesCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _loadUser() async {
     final user = await AuthService.getCurrentUser();
+    // Fetch fresh preferences from server
+    try {
+      final res = await ApiService.get('/api/user/profile', auth: true);
+      final data = res['data'] as Map<String, dynamic>;
+      final freshUser = AppUser.fromJson(data);
+      await AuthService.updatePreferencesCache(freshUser.dietaryLifestyle, freshUser.allergies);
+      if (mounted) {
+        setState(() {
+          _user = freshUser;
+          _nameCtrl.text = freshUser.name;
+          _emailCtrl.text = freshUser.email;
+          _selectedDietary = List<String>.from(freshUser.dietaryLifestyle);
+          _allergiesCtrl.text = freshUser.allergies.join(', ');
+        });
+      }
+      return;
+    } catch (_) {}
     if (mounted) {
       setState(() {
         _user = user;
         _nameCtrl.text = user?.name ?? '';
         _emailCtrl.text = user?.email ?? '';
+        _selectedDietary = List<String>.from(user?.dietaryLifestyle ?? []);
+        _allergiesCtrl.text = (user?.allergies ?? []).join(', ');
       });
+    }
+  }
+
+  Future<void> _savePreferences() async {
+    final allergies = _allergiesCtrl.text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    setState(() => _savingPreferences = true);
+    try {
+      await ApiService.patch('/api/user/preferences', {
+        'dietaryLifestyle': _selectedDietary,
+        'allergies': allergies,
+      }, auth: true);
+      await AuthService.updatePreferencesCache(_selectedDietary, allergies);
+      if (mounted) {
+        setState(() => _savingPreferences = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Preferences saved')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _savingPreferences = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e')),
+        );
+      }
     }
   }
 
@@ -178,6 +236,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () =>
                       setState(() => _paymentDetailsExpanded = !_paymentDetailsExpanded),
                   content: _paymentContent(),
+                ),
+                const SizedBox(height: 14),
+                _buildAccordionItem(
+                  icon: Icons.restaurant_menu_outlined,
+                  label: 'Dietary Preferences',
+                  isExpanded: _preferencesExpanded,
+                  onTap: () =>
+                      setState(() => _preferencesExpanded = !_preferencesExpanded),
+                  content: _preferencesContent(),
                 ),
                 const SizedBox(height: 28),
                 _buildLogoutButton(),
@@ -371,6 +438,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return const Text(
       'Payment method management coming soon.',
       style: TextStyle(color: Colors.white70, fontSize: 13),
+    );
+  }
+
+  Widget _preferencesContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Lifestyle', style: TextStyle(color: Colors.white70, fontSize: 12)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          children: _dietaryOptions.map((option) {
+            final selected = _selectedDietary.contains(option);
+            return GestureDetector(
+              onTap: () => setState(() {
+                if (selected) {
+                  _selectedDietary.remove(option);
+                } else {
+                  _selectedDietary.add(option);
+                }
+              }),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: selected ? Colors.white : Colors.white24,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  option,
+                  style: TextStyle(
+                    color: selected ? AppColors.rust : Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 14),
+        const Text('Allergies (comma-separated)', style: TextStyle(color: Colors.white70, fontSize: 12)),
+        const SizedBox(height: 6),
+        _profileField('e.g. Nuts, Shellfish, Gluten', _allergiesCtrl),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _savingPreferences ? null : _savePreferences,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.rust,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              elevation: 0,
+            ),
+            child: _savingPreferences
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.rust))
+                : const Text('Save Preferences', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+          ),
+        ),
+      ],
     );
   }
 

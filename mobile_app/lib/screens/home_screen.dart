@@ -18,7 +18,8 @@ import '../widgets/orders_card.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool isGuest;
+  const HomeScreen({super.key, this.isGuest = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -82,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildHomeContent(),
           CafeteriaScreen(cafeterias: _cafeterias),
-          const CartScreen(),
+          CartScreen(isGuest: widget.isGuest),
           const ProfileScreen(),
         ],
       ),
@@ -316,20 +317,55 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, index) {
           return FoodCard(
             item: _recommended[index],
-            onAddToCart: () {
+            onAddToCart: () async {
               final item = _recommended[index];
               final cafeteria = _cafeterias.where((c) => c.id == item.cafeteriaId).firstOrNull;
-              context.read<CartService>().addItem(
+              final cart = context.read<CartService>();
+              final added = cart.addItem(
+                item,
+                cafeteriaId: item.cafeteriaId,
+                cafeteriaName: cafeteria?.name,
+              );
+              if (!added) {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Start a new cart?'),
+                    content: Text(
+                      'You already have items from ${cart.cafeteriaName}. '
+                      'Adding this item will clear your current cart.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Keep current cart'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Start new cart'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  cart.addItem(
                     item,
                     cafeteriaId: item.cafeteriaId,
                     cafeteriaName: cafeteria?.name,
+                    clearAndAdd: true,
                   );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${item.name} added to cart'),
-                  duration: const Duration(seconds: 1),
-                ),
-              );
+                } else {
+                  return;
+                }
+              }
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${item.name} added to cart'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              }
             },
           );
         },

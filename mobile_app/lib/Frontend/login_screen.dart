@@ -220,6 +220,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: const Text('Use Biometrics'),
                     ),
                   ],
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen(isGuest: true)),
+                    ),
+                    child: const Text(
+                      'Browse as Guest',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
                   const SizedBox(height: 8),
                 ],
               ),

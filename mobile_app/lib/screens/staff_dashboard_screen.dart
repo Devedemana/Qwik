@@ -7,6 +7,7 @@ import '../models/special.dart';
 import '../services/merchant_service.dart';
 import '../services/cafeteria_service.dart';
 import '../services/auth_service.dart';
+import '../services/api_service.dart';
 import '../services/special_service.dart';
 import '../Frontend/login_screen.dart';
 
@@ -43,7 +44,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen>
     if (mounted) {
       setState(() {
         _role = role;
-        _tabs = TabController(length: _isAdmin ? 4 : 2, vsync: this);
+        _tabs = TabController(length: _isAdmin ? 5 : 2, vsync: this);
       });
     }
     _loadCafeterias();
@@ -211,6 +212,8 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen>
                     const Tab(icon: Icon(Icons.edit_note), text: 'Menu Admin'),
                   if (_isAdmin)
                     const Tab(icon: Icon(Icons.local_offer_outlined), text: 'Specials'),
+                  if (_isAdmin)
+                    const Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Analytics'),
                 ],
               ),
       ),
@@ -225,6 +228,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen>
                     _buildCafeteriaTab(),
                     if (_isAdmin) _buildAdminMenuTab(),
                     if (_isAdmin) const _SpecialsAdminTab(),
+                    if (_isAdmin) _buildAnalyticsTab(),
                   ],
                 ),
     );
@@ -412,6 +416,11 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildAnalyticsTab() {
+    if (_selected == null) return const Center(child: Text('No cafeteria selected'));
+    return _AnalyticsTab(cafeteriaId: _selected!.id);
   }
 
   Widget _buildAdminMenuTab() {
@@ -939,6 +948,175 @@ class _MenuItemRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Analytics Tab
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AnalyticsTab extends StatefulWidget {
+  final String cafeteriaId;
+  const _AnalyticsTab({required this.cafeteriaId});
+
+  @override
+  State<_AnalyticsTab> createState() => _AnalyticsTabState();
+}
+
+class _AnalyticsTabState extends State<_AnalyticsTab> {
+  Map<String, dynamic>? _data;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final res = await ApiService.get('/api/merchant/analytics/${widget.cafeteriaId}', auth: true);
+      if (mounted) setState(() { _data = res['data'] as Map<String, dynamic>; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+    final d = _data!;
+
+    final last7 = (d['last7Days'] as List).cast<Map<String, dynamic>>();
+    final topItems = (d['topItems'] as List).cast<Map<String, dynamic>>();
+    final peakHour = d['peakHour'] as Map<String, dynamic>?;
+
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Summary cards
+          Row(children: [
+            _statCard('Total Orders', '${d['totalOrders']}', Icons.receipt_long, Colors.blue),
+            const SizedBox(width: 12),
+            _statCard('Revenue', '₵${(d['totalRevenue'] as num).toStringAsFixed(2)}', Icons.payments_outlined, Colors.green),
+          ]),
+          const SizedBox(height: 12),
+          Row(children: [
+            _statCard('Avg Order', '₵${(d['avgOrderValue'] as num).toStringAsFixed(2)}', Icons.trending_up, AppColors.rust),
+            const SizedBox(width: 12),
+            _statCard('Cancelled', '${d['cancelledOrders']}', Icons.cancel_outlined, Colors.red),
+          ]),
+          const SizedBox(height: 20),
+
+          // Peak time
+          if (peakHour != null) ...[
+            _sectionTitle('Peak Order Hour'),
+            _infoCard('Most orders placed at ${_formatHour(peakHour['hour'] as int)} (${peakHour['count']} orders)'),
+            const SizedBox(height: 20),
+          ],
+
+          // Last 7 days
+          _sectionTitle('Last 7 Days'),
+          const SizedBox(height: 8),
+          ...last7.map((day) {
+            final count = day['count'] as int;
+            final maxCount = last7.map((d) => d['count'] as int).reduce((a, b) => a > b ? a : b);
+            final frac = maxCount > 0 ? count / maxCount : 0.0;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                child: Row(children: [
+                  SizedBox(
+                    width: 72,
+                    child: Text(day['date'].toString().substring(5),
+                        style: const TextStyle(fontSize: 12, color: AppColors.subtext)),
+                  ),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: frac.toDouble(),
+                        minHeight: 10,
+                        backgroundColor: AppColors.rust.withValues(alpha: 0.1),
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.rust),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text('$count', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                ]),
+              ),
+            );
+          }),
+          const SizedBox(height: 20),
+
+          // Top items
+          _sectionTitle('Top Menu Items'),
+          const SizedBox(height: 8),
+          ...topItems.asMap().entries.map((e) {
+            final i = e.key;
+            final item = e.value;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+              child: Row(children: [
+                Container(
+                  width: 28, height: 28,
+                  decoration: BoxDecoration(color: AppColors.rust.withValues(alpha: 0.1), shape: BoxShape.circle),
+                  child: Center(child: Text('${i + 1}', style: const TextStyle(color: AppColors.rust, fontWeight: FontWeight.w700, fontSize: 12))),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Text(item['name'] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14))),
+                Text('${item['count']} sold', style: const TextStyle(color: AppColors.subtext, fontSize: 12)),
+              ]),
+            );
+          }),
+          const SizedBox(height: 20),
+
+          // Inventory summary
+          _sectionTitle('Inventory'),
+          const SizedBox(height: 8),
+          _infoCard('${d['totalMenuItems']} total items  •  ${d['unavailableItems']} unavailable'),
+        ],
+      ),
+    );
+  }
+
+  Widget _statCard(String label, String value, IconData icon, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 8),
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+          Text(label, style: const TextStyle(color: AppColors.subtext, fontSize: 12)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title) => Text(title,
+      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.darkBrown));
+
+  Widget _infoCard(String text) => Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+      child: Text(text, style: const TextStyle(color: AppColors.darkBrown, fontSize: 13)));
+
+  String _formatHour(int hour) {
+    final suffix = hour < 12 ? 'AM' : 'PM';
+    final h = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    return '$h:00 $suffix';
   }
 }
 

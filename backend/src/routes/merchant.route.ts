@@ -67,4 +67,11 @@ merchantRouter.delete(
   MerchantController.deleteMenuItem,
 );
 
+merchantRouter.get(
+  "/analytics/:cafeteriaId",
+  requireRole('ADMIN'),
+  validateParams(CafeteriaIdParamSchema),
+  MerchantController.getAnalytics,
+);
+
 export default merchantRouter;

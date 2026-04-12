@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { prisma } from '../lib/index.ts';
 import { emitUpdate } from '../lib/socket.ts';
-import { isValidPickupWindow, getMealPeriodLabel, getMealPeriod } from '../lib/mealPeriod.ts';
+import { sendOrderConfirmationEmail } from './email.service.ts';
 
 interface CreateOrderInput {
   userId: string;
@@ -12,17 +12,6 @@ interface CreateOrderInput {
 
 export const OrderService = {
   async createOrder(input: CreateOrderInput) {
-    // Validate pickup window is within operating hours
-    const pickupDate = new Date(input.pickupWindow);
-    if (!isValidPickupWindow(pickupDate)) {
-      const period = getMealPeriod();
-      throw new Error(
-        period === 'CLOSED'
-          ? 'Cafeteria is closed. Operating hours: Breakfast 8–10am, Lunch & Dinner 10am–8pm.'
-          : `Pickup window must be within the current meal period (${getMealPeriodLabel(period)}).`
-      );
-    }
-
     // Fetch menu items to get prices and names
     const menuItems = await prisma.menuItem.findMany({
       where: { id: { in: input.items.map((i) => i.menuItemId) } },
@@ -63,6 +52,20 @@ export const OrderService = {
     });
 
     emitUpdate(`cafeteria:${input.cafeteriaId}`, 'new_order', { orderId: order.id });
+
+    // Send confirmation email (non-blocking — don't fail the order if email fails)
+    const user = await prisma.user.findUnique({ where: { id: input.userId }, select: { email: true, name: true } });
+    if (user) {
+      const cafeteria = await prisma.cafeteria.findUnique({ where: { id: input.cafeteriaId }, select: { name: true } });
+      sendOrderConfirmationEmail({
+        to: user.email,
+        name: user.name,
+        orderId: order.id,
+        cafeteriaName: cafeteria?.name ?? 'the cafeteria',
+        items: order.items,
+        totalAmount: order.totalAmount,
+      }).catch((err) => console.error('[email] Failed to send order confirmation:', err));
+    }
 
     return order;
   },

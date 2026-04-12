@@ -8,6 +8,8 @@ class AuthService {
   static const _keyUserName = 'user_name';
   static const _keyUserEmail = 'user_email';
   static const _keyUserRole = 'user_role';
+  static const _keyDietary = 'dietary_lifestyle';
+  static const _keyAllergies = 'allergies';
 
   static Future<AppUser> login(String email, String password) async {
     final res = await ApiService.post('/api/auth/login', {
@@ -47,7 +49,15 @@ class AuthService {
     await prefs.setString(_keyUserName, user.name);
     await prefs.setString(_keyUserEmail, user.email);
     await prefs.setString(_keyUserRole, user.role);
+    await prefs.setStringList(_keyDietary, user.dietaryLifestyle);
+    await prefs.setStringList(_keyAllergies, user.allergies);
     await ApiService.saveToken(token);
+  }
+
+  static Future<void> updatePreferencesCache(List<String> dietary, List<String> allergies) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyDietary, dietary);
+    await prefs.setStringList(_keyAllergies, allergies);
   }
 
   static Future<bool> isLoggedIn() async {
@@ -73,6 +83,8 @@ class AuthService {
       name: prefs.getString(_keyUserName) ?? '',
       email: prefs.getString(_keyUserEmail) ?? '',
       role: prefs.getString(_keyUserRole) ?? 'CUSTOMER',
+      dietaryLifestyle: prefs.getStringList(_keyDietary) ?? [],
+      allergies: prefs.getStringList(_keyAllergies) ?? [],
     );
   }
 
@@ -93,6 +105,8 @@ class AuthService {
     await prefs.remove(_keyUserName);
     await prefs.remove(_keyUserEmail);
     await prefs.remove(_keyUserRole);
+    await prefs.remove(_keyDietary);
+    await prefs.remove(_keyAllergies);
     await ApiService.clearToken();
   }
 }
