@@ -26,8 +26,9 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
   bool _searching = false;
   List<String> _userAllergies = [];
   bool _hideAllergens = false;
-  Set<String> _selectedDietary = {};
-  bool _expressOnly = false;
+  String? _selectedDietaryFilter;
+
+  static const _dietaryFilters = ['Vegan', 'Halal', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Pescatarian'];
 
   @override
   void initState() {
@@ -106,12 +107,9 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
         )
       ).toList();
     }
-    if (_expressOnly) {
-      displayItems = displayItems.where((item) => item.isExpress).toList();
-    }
-    if (_selectedDietary.isNotEmpty) {
+    if (_selectedDietaryFilter != null) {
       displayItems = displayItems.where((item) =>
-        _selectedDietary.any((d) => item.dietaryTags.contains(d))
+        item.dietaryTags.any((t) => t.toLowerCase() == _selectedDietaryFilter!.toLowerCase())
       ).toList();
     }
 
@@ -121,51 +119,15 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Menu',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.darkBrown,
-                    ),
-                  ),
-                ),
-                if (_userAllergies.isNotEmpty)
-                  GestureDetector(
-                    onTap: () => setState(() => _hideAllergens = !_hideAllergens),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _hideAllergens ? AppColors.rust : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.rust),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.no_meals_outlined, size: 14,
-                              color: _hideAllergens ? Colors.white : AppColors.rust),
-                          const SizedBox(width: 4),
-                          Text('Hide Allergens',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: _hideAllergens ? Colors.white : AppColors.rust,
-                              )),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+            child: const Text(
+              'Menu',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.darkBrown),
             ),
           ),
           const SizedBox(height: 12),
-          _buildFilterRow(),
-          const SizedBox(height: 12),
           _buildSearchBar(),
+          const SizedBox(height: 10),
+          _buildFilterBar(),
           const SizedBox(height: 16),
           if (widget.cafeterias.isNotEmpty) _buildCafeteriaTabs(),
           const SizedBox(height: 16),
@@ -186,56 +148,71 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-    const dietaryOptions = ['Vegan', 'Keto', 'Halal'];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
+  Widget _buildFilterBar() {
+    return SizedBox(
+      height: 36,
+      child: ListView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // Express toggle
-            GestureDetector(
-              onTap: () => setState(() => _expressOnly = !_expressOnly),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _expressOnly ? AppColors.orange : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _expressOnly ? AppColors.orange : AppColors.subtext.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.bolt, size: 14, color: _expressOnly ? Colors.white : AppColors.subtext),
-                    const SizedBox(width: 4),
-                    Text('Express', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _expressOnly ? Colors.white : AppColors.subtext)),
-                  ],
-                ),
-              ),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        children: [
+          if (_userAllergies.isNotEmpty) ...[
+            _filterChip(
+              label: 'Hide Allergens',
+              icon: Icons.no_meals_outlined,
+              selected: _hideAllergens,
+              onTap: () => setState(() => _hideAllergens = !_hideAllergens),
+              color: Colors.orange.shade700,
             ),
             const SizedBox(width: 8),
-            // Dietary chips
-            ...dietaryOptions.map((d) {
-              final selected = _selectedDietary.contains(d);
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: GestureDetector(
-                  onTap: () => setState(() {
-                    selected ? _selectedDietary.remove(d) : _selectedDietary.add(d);
-                  }),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: selected ? AppColors.rust : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: selected ? AppColors.rust : AppColors.subtext.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(d, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: selected ? Colors.white : AppColors.subtext)),
-                  ),
-                ),
-              );
-            }),
+          ],
+          ..._dietaryFilters.map((f) {
+            final selected = _selectedDietaryFilter == f;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _filterChip(
+                label: f,
+                selected: selected,
+                onTap: () => setState(
+                    () => _selectedDietaryFilter = selected ? null : f),
+                color: Colors.green.shade600,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChip({
+    required String label,
+    IconData? icon,
+    required bool selected,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: selected ? color : color.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 13, color: selected ? Colors.white : color),
+              const SizedBox(width: 4),
+            ],
+            Text(label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? Colors.white : color,
+                )),
           ],
         ),
       ),
@@ -321,7 +298,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 14,
           mainAxisSpacing: 14,
-          childAspectRatio: 0.78,
+          childAspectRatio: 0.72,
         ),
         itemBuilder: (context, index) {
           final item = items[index];

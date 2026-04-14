@@ -9,7 +9,6 @@ class FoodItem {
   final bool isAvailable;
   final List<String> allergenTags;
   final List<String> dietaryTags;
-  final bool isExpress;
   final List<String> ingredients;
 
   const FoodItem({
@@ -23,7 +22,6 @@ class FoodItem {
     this.isAvailable = true,
     this.allergenTags = const [],
     this.dietaryTags = const [],
-    this.isExpress = false,
     this.ingredients = const [],
   });
 
@@ -47,7 +45,6 @@ class FoodItem {
               ?.map((e) => e as String)
               .toList() ??
           [],
-      isExpress: json['isExpress'] as bool? ?? false,
       ingredients: (json['ingredients'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??

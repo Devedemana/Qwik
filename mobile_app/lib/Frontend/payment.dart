@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/cart_service.dart';
 import '../services/order_service.dart';
+import '../services/cafeteria_service.dart';
 import '../services/notification_service.dart';
 import '../utils/app_colors.dart';
 import 'oder_tracking.dart';
@@ -17,6 +18,39 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage> {
   String _selectedMethod = 'Mobile Money';
   bool _isPlacing = false;
+  DateTime _selectedPickup = DateTime.now().add(const Duration(minutes: 30));
+  String _capacityStatus = 'GREEN'; // fetched from cafeteria
+
+  // Generate 15-min slots from now+15min to now+2h
+  List<DateTime> get _pickupSlots {
+    final now = DateTime.now();
+    return List.generate(8, (i) => now.add(Duration(minutes: 15 + i * 15)));
+  }
+
+  bool _isOffPeak(DateTime dt) {
+    final hour = dt.hour;
+    final min = dt.minute;
+    final totalMins = hour * 60 + min;
+    // Off-peak: before 11:30 or after 13:30
+    return totalMins < 11 * 60 + 30 || totalMins > 13 * 60 + 30;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPickup = _pickupSlots.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCapacity());
+  }
+
+  Future<void> _loadCapacity() async {
+    final cart = context.read<CartService>();
+    if (cart.cafeteriaId == null) return;
+    try {
+      final cafeterias = await CafeteriaService.listCafeterias();
+      final match = cafeterias.where((c) => c.id == cart.cafeteriaId).firstOrNull;
+      if (mounted && match != null) setState(() => _capacityStatus = match.capacityStatus);
+    } catch (_) {}
+  }
 
   final _methods = ['Mobile Money', 'Meal Plan', 'Cash On Pickup'];
 
@@ -38,7 +72,7 @@ class _PaymentPageState extends State<PaymentPage> {
     try {
       final order = await OrderService.createOrder(
         cafeteriaId: cart.cafeteriaId!,
-        pickupWindow: DateTime.now().add(const Duration(minutes: 30)),
+        pickupWindow: _selectedPickup,
         items: cart.toOrderItems(),
       );
 
@@ -91,7 +125,7 @@ class _PaymentPageState extends State<PaymentPage> {
     try {
       final order = await OrderService.createOrder(
         cafeteriaId: cart.cafeteriaId!,
-        pickupWindow: DateTime.now().add(const Duration(minutes: 30)),
+        pickupWindow: _selectedPickup,
         items: cart.toOrderItems(),
       );
 
@@ -215,6 +249,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   style: const TextStyle(color: AppColors.subtext, fontSize: 13),
                 ),
               ),
+            _buildPickupWindowSection(),
             const Spacer(),
             _priceRow("Subtotal", '₵${cart.subtotal.toStringAsFixed(2)}'),
             _priceRow("Taxes & fees", '₵${cart.taxes.toStringAsFixed(2)}'),
@@ -268,6 +303,107 @@ class _PaymentPageState extends State<PaymentPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPickupWindowSection() {
+    final capacityColor = _capacityStatus == 'GREEN'
+        ? Colors.green
+        : _capacityStatus == 'YELLOW'
+            ? Colors.orange
+            : Colors.red;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('Pickup Window',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.darkBrown)),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: capacityColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 7, height: 7,
+                      decoration: BoxDecoration(color: capacityColor, shape: BoxShape.circle)),
+                  const SizedBox(width: 4),
+                  Text(_capacityStatus,
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: capacityColor)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 62,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _pickupSlots.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, i) {
+              final slot = _pickupSlots[i];
+              final selected = _selectedPickup == slot;
+              final offPeak = _isOffPeak(slot);
+              final h = slot.hour.toString().padLeft(2, '0');
+              final m = slot.minute.toString().padLeft(2, '0');
+              return GestureDetector(
+                onTap: () => setState(() => _selectedPickup = slot),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 66,
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.darkBrown : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: selected ? AppColors.darkBrown : Colors.black12),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('$h:$m',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: selected ? Colors.white : AppColors.darkBrown)),
+                      if (offPeak)
+                        Container(
+                          margin: const EdgeInsets.only(top: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: selected ? Colors.green.withValues(alpha: 0.3) : Colors.green.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text('Off-Peak',
+                              style: TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w700,
+                                  color: selected ? Colors.greenAccent : Colors.green.shade700)),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _capacityStatus == 'RED'
+              ? 'Cafeteria is very busy — consider an off-peak slot'
+              : _capacityStatus == 'YELLOW'
+                  ? 'Cafeteria is moderately busy'
+                  : 'Cafeteria has good availability',
+          style: TextStyle(fontSize: 11, color: capacityColor),
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 

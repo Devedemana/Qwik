@@ -584,6 +584,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
   final _descCtrl = TextEditingController();
   final _imageCtrl = TextEditingController();
   final _allergensCtrl = TextEditingController();
+  final _dietaryCtrl = TextEditingController();
+  final _ingredientsCtrl = TextEditingController();
   bool _saving = false;
   String? _error;
 
@@ -597,6 +599,9 @@ class _MenuItemFormState extends State<_MenuItemForm> {
       _categoryCtrl.text = e.category;
       _descCtrl.text = e.description;
       _imageCtrl.text = e.imageUrl;
+      _allergensCtrl.text = e.allergenTags.join(', ');
+      _dietaryCtrl.text = e.dietaryTags.join(', ');
+      _ingredientsCtrl.text = e.ingredients.join(', ');
     }
   }
 
@@ -604,6 +609,7 @@ class _MenuItemFormState extends State<_MenuItemForm> {
   void dispose() {
     _nameCtrl.dispose(); _priceCtrl.dispose(); _categoryCtrl.dispose();
     _descCtrl.dispose(); _imageCtrl.dispose(); _allergensCtrl.dispose();
+    _dietaryCtrl.dispose(); _ingredientsCtrl.dispose();
     super.dispose();
   }
 
@@ -620,9 +626,12 @@ class _MenuItemFormState extends State<_MenuItemForm> {
       setState(() => _error = 'Enter a valid price');
       return;
     }
-    final allergens = _allergensCtrl.text.trim().isEmpty
-        ? <String>[]
-        : _allergensCtrl.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    List<String> parseList(String raw) =>
+        raw.trim().isEmpty ? [] : raw.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+    final allergens = parseList(_allergensCtrl.text);
+    final dietary = parseList(_dietaryCtrl.text);
+    final ingredients = parseList(_ingredientsCtrl.text);
 
     setState(() { _saving = true; _error = null; });
     try {
@@ -634,6 +643,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
           category: category,
           description: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
           allergenTags: allergens,
+          dietaryTags: dietary,
+          ingredients: ingredients,
           imageUrl: _imageCtrl.text.trim().isEmpty ? null : _imageCtrl.text.trim(),
         );
       } else {
@@ -643,6 +654,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
           'category': category,
           if (_descCtrl.text.trim().isNotEmpty) 'description': _descCtrl.text.trim(),
           'allergenTags': allergens,
+          'dietaryTags': dietary,
+          'ingredients': ingredients,
           if (_imageCtrl.text.trim().isNotEmpty) 'imageUrl': _imageCtrl.text.trim(),
         });
       }
@@ -690,6 +703,8 @@ class _MenuItemFormState extends State<_MenuItemForm> {
             _field('Category *', _categoryCtrl),
             _field('Description', _descCtrl),
             _field('Allergens (comma-separated)', _allergensCtrl),
+            _field('Dietary Tags (comma-separated, e.g. Vegan, Halal)', _dietaryCtrl),
+            _field('Ingredients (comma-separated)', _ingredientsCtrl),
             _field('Image URL', _imageCtrl, type: TextInputType.url),
             if (_error != null)
               Padding(

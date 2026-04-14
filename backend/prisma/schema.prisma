@@ -55,6 +55,8 @@ model MenuItem {
   category     String
   isAvailable  Boolean   @default(true)
   allergenTags String[]
+  dietaryTags  String[]  // e.g. Vegan, Halal, Gluten-Free
+  ingredients  String[]  // ingredient list for nutritional transparency
   imageUrl     String?
 
   cafeteria    Cafeteria @relation(fields: [cafeteriaId], references: [id])
