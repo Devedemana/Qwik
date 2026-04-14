@@ -388,7 +388,8 @@ export const ModelName = {
   Cafeteria: 'Cafeteria',
   MenuItem: 'MenuItem',
   Order: 'Order',
-  OrderItem: 'OrderItem'
+  OrderItem: 'OrderItem',
+  Special: 'Special'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "cafeteria" | "menuItem" | "order" | "orderItem"
+    modelProps: "user" | "cafeteria" | "menuItem" | "order" | "orderItem" | "special"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +779,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Special: {
+      payload: Prisma.$SpecialPayload<ExtArgs>
+      fields: Prisma.SpecialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SpecialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SpecialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>
+        }
+        findFirst: {
+          args: Prisma.SpecialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SpecialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>
+        }
+        findMany: {
+          args: Prisma.SpecialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>[]
+        }
+        create: {
+          args: Prisma.SpecialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>
+        }
+        createMany: {
+          args: Prisma.SpecialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SpecialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>[]
+        }
+        delete: {
+          args: Prisma.SpecialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>
+        }
+        update: {
+          args: Prisma.SpecialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>
+        }
+        deleteMany: {
+          args: Prisma.SpecialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SpecialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SpecialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>[]
+        }
+        upsert: {
+          args: Prisma.SpecialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SpecialPayload>
+        }
+        aggregate: {
+          args: Prisma.SpecialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSpecial>
+        }
+        groupBy: {
+          args: Prisma.SpecialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SpecialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SpecialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SpecialCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -835,7 +910,8 @@ export const CafeteriaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   isOpen: 'isOpen',
-  capacityStatus: 'capacityStatus'
+  capacityStatus: 'capacityStatus',
+  imageUrl: 'imageUrl'
 } as const
 
 export type CafeteriaScalarFieldEnum = (typeof CafeteriaScalarFieldEnum)[keyof typeof CafeteriaScalarFieldEnum]
@@ -882,6 +958,21 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const SpecialScalarFieldEnum = {
+  id: 'id',
+  tag: 'tag',
+  title: 'title',
+  subtitle: 'subtitle',
+  imageUrl: 'imageUrl',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isActive: 'isActive',
+  createdAt: 'createdAt'
+} as const
+
+export type SpecialScalarFieldEnum = (typeof SpecialScalarFieldEnum)[keyof typeof SpecialScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1118,6 +1209,7 @@ export type GlobalOmitConfig = {
   menuItem?: Prisma.MenuItemOmit
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit
+  special?: Prisma.SpecialOmit
 }
 
 /* Types for Logging */

@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
-import '../models/cart_item.dart';
+
+abstract class CartItemLike {
+  String get name;
+  String get subtitle;
+  double get price;
+  String get imagePath;
+  int get quantity;
+}
 
 class CartItemCard extends StatelessWidget {
-  final CartItem item;
+  final CartItemLike item;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
 
@@ -20,12 +27,10 @@ class CartItemCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        // color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          // Food image
           Container(
             decoration: BoxDecoration(
               color: AppColors.rust,
@@ -33,22 +38,18 @@ class CartItemCard extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(11),
-              child: Image.asset(
-              item.imagePath,
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                width: 70,
-                height: 70,
-                color: AppColors.subtext.withValues(alpha: 0.2),
-                child: const Icon(Icons.fastfood, color: AppColors.subtext),
-              ),
-            ),
+              child: item.imagePath.startsWith('http')
+                  ? Image.network(
+                      item.imagePath,
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _placeholder(),
+                    )
+                  : _placeholder(),
             ),
           ),
           const SizedBox(width: 12),
-          // Name, subtitle, price, and quantity controls
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,10 +65,7 @@ class CartItemCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   item.subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.subtext,
-                  ),
+                  style: const TextStyle(fontSize: 13, color: AppColors.subtext),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -79,7 +77,6 @@ class CartItemCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Quantity controls below the price
                 Row(
                   children: [
                     _QuantityButton(icon: Icons.remove, onTap: onDecrement),
@@ -104,6 +101,13 @@ class CartItemCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _placeholder() => Container(
+        width: 70,
+        height: 70,
+        color: AppColors.subtext.withValues(alpha: 0.2),
+        child: const Icon(Icons.fastfood, color: AppColors.subtext),
+      );
 }
 
 class _QuantityButton extends StatelessWidget {
@@ -119,7 +123,6 @@ class _QuantityButton extends StatelessWidget {
         width: 20,
         height: 20,
         decoration: BoxDecoration(
-          color: Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.rust),
         ),

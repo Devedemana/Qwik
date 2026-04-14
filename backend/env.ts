@@ -3,7 +3,6 @@ import {z } from 'zod';
 
 //determine app stage
 process.env.APP_STAGE = process.env.VITEST ? 'test' : (process.env.APP_STAGE || 'dev');
-const isProduction = process.env.APP_STAGE === 'production';
 const isTesting = process.env.APP_STAGE === 'test';
 const isDevelopment = process.env.APP_STAGE === 'dev';
 
@@ -18,11 +17,17 @@ export const envSchema = z.object({
   APP_STAGE: z.enum(['production', 'dev', 'test']).default('dev'),
   PORT: z.coerce.number().positive().default(3000),
   // Prisma MongoDB URL validation
-  DATABASE_URL: z.string().url().regex(/^postgres:\/\//, "DATABASE_URL must be a valid Postgres connection string"),
+  DATABASE_URL: z.string().url().regex(/^postgresql?:\/\//, "DATABASE_URL must be a valid Postgres connection string"),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_ROUNDS: z.coerce.number().min(12).default(12),
   BECRYPT_ROTATE: z.coerce.number().min(10).max(12).default(10),
+  IMAGE_BASE_URL: z.string().url().default('http://localhost:3001'),
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default('Qwik <no-reply@qwik.app>'),
 });
 // export envschema type
 export type Env = z.infer<typeof envSchema>;

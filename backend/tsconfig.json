@@ -3,6 +3,7 @@
   "include": ["./src", "./tests"],
   "exclude": ["node_modules"],
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "baseUrl": "src",
    "paths": {
       "@/*": ["src/*"],

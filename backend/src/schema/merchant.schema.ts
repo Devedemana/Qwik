@@ -41,3 +41,27 @@ export const OrderIdParamSchema = z.object({
 export const AdvanceOrderBodySchema = z.object({
   status: z.enum(['PREPPING', 'READY', 'COMPLETED', 'CANCELLED'])
 });
+
+export const MenuItemIdParamSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const CreateMenuItemSchema = z.object({
+  cafeteriaId: z.string().min(1),
+  name: z.string().min(1),
+  price: z.number().positive(),
+  category: z.string().min(1),
+  description: z.string().optional(),
+  allergenTags: z.array(z.string()).optional(),
+  imageUrl: z.string().url().optional(),
+});
+
+export const UpdateMenuItemSchema = z.object({
+  name: z.string().min(1).optional(),
+  price: z.number().positive().optional(),
+  category: z.string().min(1).optional(),
+  description: z.string().optional(),
+  allergenTags: z.array(z.string()).optional(),
+  imageUrl: z.string().url().optional(),
+  isAvailable: z.boolean().optional(),
+});

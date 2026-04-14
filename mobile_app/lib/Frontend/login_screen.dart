@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/local_auth_service.dart';
+import '../services/notification_service.dart';
 import '../screens/home_screen.dart';
+import '../screens/staff_dashboard_screen.dart';
+import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,46 +16,117 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isBiometricLoading = false;
   String? _errorMessage;
+  bool _biometricAvailable = false;
+  bool _biometricEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final available = await LocalAuthService.isAvailable();
+    final enabled = await LocalAuthService.isEnabled();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled = enabled;
+      });
+    }
+  }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
-    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    if (username.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = 'Please enter username and password');
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your email and password');
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    setState(() { _isLoading = true; _errorMessage = null; });
 
-    final success = await AuthService.login(username, password);
+    try {
+      final user = await AuthService.login(email, password);
+      if (!mounted) return;
 
-    if (!mounted) return;
+      // After first successful login, offer to enable biometrics
+      if (_biometricAvailable && !_biometricEnabled) {
+        await _offerBiometricSetup();
+      }
 
-    setState(() => _isLoading = false);
-
-    if (success) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      setState(() => _errorMessage = 'Invalid username or password');
+      _navigateHome(user.role, user.id);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _isLoading = false; _errorMessage = e.toString(); });
     }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    setState(() { _isBiometricLoading = true; _errorMessage = null; });
+    try {
+      final passed = await LocalAuthService.authenticate(
+        reason: 'Sign in to Qwik with biometrics',
+      );
+      if (!mounted) return;
+      if (!passed) {
+        setState(() {
+          _isBiometricLoading = false;
+          _errorMessage = 'Biometric authentication failed';
+        });
+        return;
+      }
+      // Token was already verified valid by isLoggedIn on splash — get cached user
+      final user = await AuthService.getCurrentUser();
+      if (!mounted) return;
+      if (user == null) {
+        setState(() { _isBiometricLoading = false; _errorMessage = 'Session expired. Please log in.'; });
+        return;
+      }
+      _navigateHome(user.role, user.id);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _isBiometricLoading = false; _errorMessage = e.toString(); });
+    }
+  }
+
+  Future<void> _offerBiometricSetup() async {
+    final enable = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Enable Biometric Login?'),
+        content: const Text('Use fingerprint or face ID to sign in faster next time.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Not now')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Enable')),
+        ],
+      ),
+    );
+    if (enable == true) {
+      await LocalAuthService.setEnabled(true);
+    }
+  }
+
+  void _navigateHome(String role, String userId) {
+    context.read<NotificationService>().connectSocket(userId);
+    final isStaff = role == 'STAFF' || role == 'ADMIN';
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => isStaff ? const StaffDashboardScreen() : const HomeScreen()),
+    );
   }
 
   @override
@@ -61,8 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         actions: [
           TextButton(
-            onPressed: () {},
-            child: const Text("Register", style: TextStyle(color: Colors.black)),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+            child: const Text('Register', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -71,23 +148,17 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 20),
           Center(
             child: Text(
-              "Qwik",
+              'Qwik',
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFFFFD700),
-                shadows: [
-                  Shadow(
-                    blurRadius: 8,
-                    color: Colors.brown.withValues(alpha: 0.5),
-                    offset: const Offset(2, 2),
-                  ),
-                ],
+                shadows: [Shadow(blurRadius: 8, color: Colors.brown.withValues(alpha: 0.5), offset: const Offset(2, 2))],
               ),
             ),
           ),
           const SizedBox(height: 8),
-          const Text("Login", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const Text('Login', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Expanded(
             child: Container(
@@ -103,60 +174,68 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  _inputField("UserName", controller: _usernameController),
+                  _inputField('Email', controller: _emailController, keyboardType: TextInputType.emailAddress),
                   const SizedBox(height: 16),
-                  _inputField("Password", controller: _passwordController, obscure: true),
+                  _inputField('Password', controller: _passwordController, obscure: true),
                   const SizedBox(height: 8),
                   if (_errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Color(0xFFFFD700), fontSize: 14),
-                      ),
+                      child: Text(_errorMessage!,
+                          style: const TextStyle(color: Color(0xFFFFD700), fontSize: 14),
+                          textAlign: TextAlign.center),
                     ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
-                      child: const Text("Forgot Password?",
-                          style: TextStyle(color: Colors.white70)),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                      ),
+                      child: const Text('Forgot Password?', style: TextStyle(color: Colors.white70)),
                     ),
-                  ),
-                  const Text("Or login with",
-                      style: TextStyle(color: Colors.white70)),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _socialButton("G", const Color(0xFFFFD700)),
-                      const SizedBox(width: 16),
-                      _socialButton("", const Color(0xFFFFD700),
-                          icon: Icons.apple),
-                    ],
                   ),
                   const Spacer(),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       minimumSize: const Size(double.infinity, 55),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
                     onPressed: _isLoading ? null : _handleLogin,
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text("Login",
-                            style: TextStyle(color: Colors.white, fontSize: 16)),
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text('Login', style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
+                  // Biometric button — shown when device supports it and user has enabled it
+                  if (_biometricAvailable && _biometricEnabled) ...[
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white54),
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                      onPressed: _isBiometricLoading ? null : _handleBiometricLogin,
+                      icon: _isBiometricLoading
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.fingerprint, size: 22),
+                      label: const Text('Use Biometrics'),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen(isGuest: true)),
+                    ),
+                    child: const Text(
+                      'Browse as Guest',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -166,38 +245,20 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _inputField(String hint, {
-    required TextEditingController controller,
-    bool obscure = false,
-  }) {
+  Widget _inputField(String hint, {required TextEditingController controller, bool obscure = false, TextInputType keyboardType = TextInputType.text}) {
     return TextField(
       controller: controller,
       obscureText: obscure,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.white70),
         filled: true,
         fillColor: Colors.white24,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
       style: const TextStyle(color: Colors.white),
-    );
-  }
-
-  Widget _socialButton(String label, Color color, {IconData? icon}) {
-    return CircleAvatar(
-      backgroundColor: color,
-      radius: 22,
-      child: icon != null
-          ? Icon(icon, color: Colors.white)
-          : Text(label,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 }

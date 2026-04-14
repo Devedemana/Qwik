@@ -1,22 +1,16 @@
-import {app} from './app.ts'
+import { server } from './app.ts'
 import { env } from './../env.ts'
-import { profileEnd } from 'console';
 
-
-const PORT = env.PORT || 3000; 
+const PORT = Number(process.env.PORT) || env.PORT || 3001;
 async function startServer() {
     try {
-        // background process like notifications: goes here 
-
-        // start server 
-        app.listen(env.PORT, () => {
+        server.listen(PORT, () => {
             console.log("Server is running on port: ", PORT);
-        }); 
-        
-    } catch (error: unknown) {
+        });
+    } catch (_error: unknown) {
         console.log("App failed to start")
     }
 }
 
-// start server 
-startServer(); 
+// start server
+startServer();

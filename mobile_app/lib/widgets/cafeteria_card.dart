@@ -6,6 +6,14 @@ class CafeteriaCard extends StatelessWidget {
   final Cafeteria cafeteria;
   const CafeteriaCard({super.key, required this.cafeteria});
 
+  Color _mealPeriodColor(String period) {
+    switch (period) {
+      case 'BREAKFAST': return Colors.orange.shade700;
+      case 'LUNCH_DINNER': return Colors.green.shade600;
+      default: return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -24,7 +32,7 @@ class CafeteriaCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Image.network(
-                    cafeteria.imageAsset,
+                    cafeteria.imageAsset.isNotEmpty ? cafeteria.imageAsset : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300',
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) =>
@@ -32,13 +40,28 @@ class CafeteriaCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                   child: Text(
                     cafeteria.name,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: _mealPeriodColor(cafeteria.mealPeriod).withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      cafeteria.mealPeriodLabel,
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

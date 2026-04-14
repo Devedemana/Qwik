@@ -58,6 +58,39 @@ mobile_app/ios/Runner/GeneratedPluginRegistrant.*
 .classpath
 .settings/
 
+# --- Root ---
+node_modules/
+package-lock.json
+package.json
+
+# --- Local Auth App (Flutter / Dart) ---
+localAuth/local_auth_app/.dart_tool/
+localAuth/local_auth_app/.flutter-plugins
+localAuth/local_auth_app/.flutter-plugins-dependencies
+localAuth/local_auth_app/.packages
+localAuth/local_auth_app/.pub-cache/
+localAuth/local_auth_app/.pub/
+localAuth/local_auth_app/build/
+localAuth/local_auth_app/linux/flutter/generated_plugin_registrant.cc
+localAuth/local_auth_app/linux/flutter/generated_plugin_registrant.h
+localAuth/local_auth_app/linux/flutter/generated_plugins.cmake
+localAuth/local_auth_app/macos/Flutter/GeneratedPluginRegistrant.swift
+localAuth/local_auth_app/windows/flutter/generated_plugin_registrant.cc
+localAuth/local_auth_app/windows/flutter/generated_plugin_registrant.h
+localAuth/local_auth_app/windows/flutter/generated_plugins.cmake
+
+# --- Mobile App generated platform files ---
+mobile_app/linux/flutter/generated_plugin_registrant.cc
+mobile_app/linux/flutter/generated_plugin_registrant.h
+mobile_app/linux/flutter/generated_plugins.cmake
+mobile_app/macos/Flutter/GeneratedPluginRegistrant.swift
+mobile_app/windows/flutter/generated_plugin_registrant.cc
+mobile_app/windows/flutter/generated_plugin_registrant.h
+mobile_app/windows/flutter/generated_plugins.cmake
+
+# --- Claude ---
+.claude/
+
 # --- Infrastructure ---
 # Ignore local docker data volumes if you mount them locally
 mongo-data/
