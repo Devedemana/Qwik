@@ -31,4 +31,17 @@ export const UserController = {
       return res.status(500).json({ success: false, error: error.message });
     }
   },
+
+  async registerFcmToken(req: AuthRequest, res: Response) {
+    try {
+      const { token } = req.body;
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ success: false, error: 'token is required' });
+      }
+      await UserService.updateFcmToken(req.user!.id, token);
+      return res.status(200).json({ success: true });
+    } catch (error: any) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
 };

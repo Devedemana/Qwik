@@ -72,3 +72,38 @@ export async function sendOrderConfirmationEmail(opts: OrderEmailOptions): Promi
     html,
   });
 }
+
+interface ResetEmailOptions {
+  to: string;
+  name: string;
+  otp: string;
+}
+
+export async function sendPasswordResetEmail(opts: ResetEmailOptions): Promise<void> {
+  if (!env.SMTP_USER || !env.SMTP_PASS) {
+    console.warn('[email] SMTP not configured — cannot send password reset email');
+    return;
+  }
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#333">
+      <div style="background:#8B3A0F;padding:24px;text-align:center;border-radius:8px 8px 0 0">
+        <h1 style="color:#FFD700;margin:0;font-size:28px">Qwik</h1>
+      </div>
+      <div style="background:#fff;padding:24px;border-radius:0 0 8px 8px;border:1px solid #f0e8df">
+        <h2 style="margin-top:0">Password Reset</h2>
+        <p>Hi ${opts.name}, use the code below to reset your password. It expires in <strong>15 minutes</strong>.</p>
+        <div style="text-align:center;margin:24px 0">
+          <span style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#8B3A0F">${opts.otp}</span>
+        </div>
+        <p style="color:#888;font-size:12px">If you didn't request a password reset, you can safely ignore this email.</p>
+      </div>
+    </div>`;
+
+  await transporter.sendMail({
+    from: env.SMTP_FROM,
+    to: opts.to,
+    subject: 'Your Qwik password reset code',
+    html,
+  });
+}

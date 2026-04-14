@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../Frontend/login_screen.dart';
 import '../Frontend/oder_tracking.dart';
+import 'order_history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -395,42 +396,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Text('No orders yet', style: TextStyle(color: Colors.white70));
     }
     return Column(
-      children: _orders.take(5).map((o) {
-        return GestureDetector(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ..._orders.take(3).map((o) {
+          return GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => OrderTrackingPage(order: o)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(o.cafeteriaName,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13)),
+                        Text(o.statusDisplay,
+                            style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  Text('₵${o.totalAmount.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.chevron_right, color: Colors.white54, size: 18),
+                ],
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 4),
+        GestureDetector(
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => OrderTrackingPage(order: o)),
+            MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(o.cafeteriaName,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13)),
-                      Text(o.statusDisplay,
-                          style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
-                    ],
-                  ),
-                ),
-                Text('₵${o.totalAmount.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w600)),
-                const SizedBox(width: 6),
-                const Icon(Icons.chevron_right, color: Colors.white54, size: 18),
-              ],
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Center(
+              child: Text(
+                'View All Orders',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+              ),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      ],
     );
   }
 

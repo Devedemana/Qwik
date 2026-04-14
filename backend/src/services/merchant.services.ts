@@ -1,6 +1,8 @@
 import { prisma } from "../lib/index.ts";
 import { emitUpdate } from "../lib/socket.ts";
 import { CapacityStatus, OrderStatus } from "../../prisma/generated/prisma/enums.ts";
+import { FcmService } from "./fcm.service.ts";
+import { UserService } from "./user.service.ts";
 
 export const MerchantService = {
   async updateCafeteriaStatus(cafeteriaId: string, status: CapacityStatus) {
@@ -61,8 +63,22 @@ export const MerchantService = {
       cafeteriaName: (updated as any).cafeteria?.name ?? '',
     };
     emitUpdate(`order:${orderId}`, 'order_status_update', payload);
-    // Also push to the user's personal room so their device gets notified
     emitUpdate(`user:${currentOrder!.userId}`, 'order_status_update', payload);
+
+    // FCM push notification (non-blocking)
+    UserService.getFcmToken(currentOrder!.userId).then((token) => {
+      if (!token) return;
+      const titles: Record<string, string> = {
+        PREPPING: 'Your order is being prepared 🍳',
+        READY: 'Your order is ready for pickup! 🎉',
+        COMPLETED: 'Order completed — enjoy your meal!',
+        CANCELLED: 'Your order was cancelled',
+      };
+      const title = titles[nextStatus] ?? 'Order update';
+      const body = `${payload.cafeteriaName} — Order #${orderId.substring(0, 8).toUpperCase()}`;
+      FcmService.sendToToken(token, title, body, { orderId, status: nextStatus });
+    }).catch(() => {});
+
     return updated;
   },
   

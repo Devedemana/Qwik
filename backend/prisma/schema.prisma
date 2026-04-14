@@ -19,6 +19,7 @@ model User {
   role             Role     @default(CUSTOMER)
   dietaryLifestyle String[] // Postgres supports native scalar lists (arrays)
   allergies        String[]
+  fcmToken         String?
   orders           Order[]
   createdAt        DateTime @default(now())
 }

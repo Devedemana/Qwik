@@ -40,4 +40,16 @@ export const UserService = {
       select: { id: true, name: true, email: true, role: true },
     });
   },
+
+  async updateFcmToken(userId: string, fcmToken: string) {
+    return prisma.user.update({ where: { id: userId }, data: { fcmToken } });
+  },
+
+  async getFcmToken(userId: string): Promise<string | null> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { fcmToken: true },
+    });
+    return user?.fcmToken ?? null;
+  },
 };

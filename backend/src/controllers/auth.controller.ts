@@ -23,4 +23,26 @@ export const AuthController = {
       return res.status(status).json({ success: false, error: error.message });
     }
   },
+
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      await AuthService.forgotPassword(email);
+      // Always return 200 to prevent email enumeration
+      return res.status(200).json({ success: true, message: 'If that email exists, a reset code was sent.' });
+    } catch (error: any) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { email, otp, newPassword } = req.body;
+      await AuthService.resetPassword(email, otp, newPassword);
+      return res.status(200).json({ success: true, message: 'Password updated.' });
+    } catch (error: any) {
+      const status = error.message === 'Invalid or expired code' ? 400 : 500;
+      return res.status(status).json({ success: false, error: error.message });
+    }
+  },
 };

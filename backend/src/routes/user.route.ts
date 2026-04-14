@@ -11,5 +11,6 @@ userRouter.use(authenticate);
 userRouter.get('/profile', UserController.getProfile);
 userRouter.patch('/profile', UserController.updateProfile);
 userRouter.patch('/preferences', validateBody(UpdatePreferencesSchema), UserController.updatePreferences);
+userRouter.post('/fcm-token', UserController.registerFcmToken);
 
 export default userRouter;

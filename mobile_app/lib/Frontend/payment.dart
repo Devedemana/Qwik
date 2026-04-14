@@ -104,11 +104,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
       cart.clear();
 
-      // Open MTN MoMo dialer — use Uri.fromParts so # is not re-encoded
-      final uri = Uri(scheme: 'tel', path: '*170#');
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      if (!mounted) return;
+      await _showMoMoNetworkSheet();
 
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -135,6 +132,59 @@ class _PaymentPageState extends State<PaymentPage> {
       default:
         return 'Place Order';
     }
+  }
+
+  Future<void> _showMoMoNetworkSheet() async {
+    const networks = [
+      ('MTN MoMo', '*170#'),
+      ('Telecel Cash', '*110#'),
+      ('AirtelTigo Money', '*100#'),
+    ];
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Order placed!',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            const Text('Open your dialer and complete MoMo payment.',
+                style: TextStyle(color: Colors.black54, fontSize: 13)),
+            const SizedBox(height: 16),
+            ...networks.map((n) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.phone, color: Color(0xFF8B3A10)),
+                  title: Text(n.$1,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  trailing: Text(n.$2,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF8B3A10))),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final uri = Uri(scheme: 'tel', path: n.$2);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                )),
+            const Divider(),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Center(
+                  child: Text('Pay later',
+                      style: TextStyle(color: Colors.black54))),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
