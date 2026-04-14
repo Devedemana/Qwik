@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "263806107436",
+    "project_id": "qwik-c6e20",
+    "storage_bucket": "qwik-c6e20.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263806107436:android:6ab25f882eea00b4083689",
+        "android_client_info": {
+          "package_name": "com.example.frontend_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKMy5dizkYVFpt5wwUrAFmENH5dTho0XE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

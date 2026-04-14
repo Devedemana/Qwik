@@ -11,7 +11,7 @@ class OrderService {
       '/api/orders',
       {
         'cafeteriaId': cafeteriaId,
-        'pickupWindow': pickupWindow.toIso8601String(),
+        'pickupWindow': pickupWindow.toUtc().toIso8601String(),
         'items': items,
       },
       auth: true,
