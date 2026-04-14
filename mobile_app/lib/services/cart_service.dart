@@ -16,6 +16,7 @@ class CartService extends ChangeNotifier {
   final List<CartEntry> _entries = [];
   String? _cafeteriaId;
   String? _cafeteriaName;
+  int _splitCount = 1;
 
   List<CartEntry> get entries => List.unmodifiable(_entries);
   String? get cafeteriaId => _cafeteriaId;
@@ -28,6 +29,13 @@ class CartService extends ChangeNotifier {
   double get taxes => subtotal * 0.044;
   double get deliveryFee => isEmpty ? 0 : 6.0;
   double get total => subtotal + taxes + deliveryFee;
+  int get splitCount => _splitCount;
+  double get perPerson => _splitCount > 1 ? total / _splitCount : total;
+
+  void setSplitCount(int count) {
+    _splitCount = count.clamp(1, 20);
+    notifyListeners();
+  }
 
   /// Returns true if the item was added, false if there is a cafeteria conflict.
   /// When [clearAndAdd] is true, the existing cart is cleared before adding.
@@ -76,6 +84,7 @@ class CartService extends ChangeNotifier {
     _entries.clear();
     _cafeteriaId = null;
     _cafeteriaName = null;
+    _splitCount = 1;
     notifyListeners();
   }
 

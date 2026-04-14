@@ -54,7 +54,6 @@ class _PaymentPageState extends State<PaymentPage> {
 
   final _methods = ['Mobile Money', 'Meal Plan', 'Cash On Pickup'];
 
-  // Descriptions shown below each option
   static const _descriptions = {
     'Mobile Money': 'You will be redirected to dial *170# to complete payment via MTN MoMo.',
     'Meal Plan': 'Pay using your Ashesi meal plan at the cafeteria counter.',
@@ -69,7 +68,6 @@ class _PaymentPageState extends State<PaymentPage> {
       return;
     }
 
-    // Meal Plan and Cash On Pickup — place order, pay at cafeteria
     setState(() => _isPlacing = true);
     try {
       final order = await OrderService.createOrder(
@@ -99,7 +97,6 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Future<void> _launchMoMoDial(CartService cart) async {
-    // Show confirmation dialog before placing order + opening dialer
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -259,6 +256,29 @@ class _PaymentPageState extends State<PaymentPage> {
             _priceRow("Delivery Fee", '₵${cart.deliveryFee.toStringAsFixed(2)}'),
             const Divider(),
             _priceRow("Total", '₵${cart.total.toStringAsFixed(2)}', bold: true),
+            if (cart.splitCount > 1) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5A623).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFF5A623).withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.call_split, color: Color(0xFFF5A623), size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Split ÷${cart.splitCount}  •  You pay ₵${cart.perPerson.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFFF5A623)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,

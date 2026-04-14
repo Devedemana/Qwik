@@ -26,7 +26,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
   bool _searching = false;
   List<String> _userAllergies = [];
   bool _hideAllergens = false;
-  String? _selectedDietaryFilter; // e.g. 'Vegan', 'Halal', etc.
+  String? _selectedDietaryFilter;
 
   static const _dietaryFilters = ['Vegan', 'Halal', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Pescatarian'];
 
@@ -155,7 +155,6 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
-          // Allergen toggle — only shown if user has allergies set
           if (_userAllergies.isNotEmpty) ...[
             _filterChip(
               label: 'Hide Allergens',
@@ -166,7 +165,6 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
             ),
             const SizedBox(width: 8),
           ],
-          // Lifestyle filter chips
           ..._dietaryFilters.map((f) {
             final selected = _selectedDietaryFilter == f;
             return Padding(
@@ -300,7 +298,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 14,
           mainAxisSpacing: 14,
-          childAspectRatio: 0.78,
+          childAspectRatio: 0.72,
         ),
         itemBuilder: (context, index) {
           final item = items[index];

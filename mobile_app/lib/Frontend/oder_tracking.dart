@@ -26,7 +26,6 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
   void _subscribeToUpdates() {
     SocketService.onOrderStatus((orderId, status, _) {
       if (orderId == _order.id && mounted) {
-        // Fetch fresh order so we get the latest data
         _refreshOrder();
       }
     });

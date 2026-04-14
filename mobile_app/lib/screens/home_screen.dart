@@ -262,14 +262,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.darkBrown,
-              borderRadius: BorderRadius.circular(26),
+          GestureDetector(
+            onTap: () => setState(() => _currentNavIndex = 1),
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.darkBrown,
+                borderRadius: BorderRadius.circular(26),
+              ),
+              child: const Icon(Icons.tune, color: Colors.white, size: 20),
             ),
-            child: const Icon(Icons.tune, color: Colors.white, size: 20),
           ),
         ],
       ),

@@ -96,6 +96,21 @@ class FoodCard extends StatelessWidget {
                       fontSize: 11,
                     ),
                   ),
+                  if (item.allergenTags.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 4,
+                      children: item.allergenTags.take(3).map((tag) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade300.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(tag, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w600)),
+                      )).toList(),
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     item.priceDisplay,
