@@ -51,6 +51,8 @@ class MerchantService {
     required String category,
     String? description,
     List<String>? allergenTags,
+    List<String>? dietaryTags,
+    List<String>? ingredients,
     String? imageUrl,
   }) async {
     await ApiService.post(
@@ -62,6 +64,8 @@ class MerchantService {
         'category': category,
         if (description != null) 'description': description,
         if (allergenTags != null) 'allergenTags': allergenTags,
+        if (dietaryTags != null) 'dietaryTags': dietaryTags,
+        if (ingredients != null) 'ingredients': ingredients,
         if (imageUrl != null) 'imageUrl': imageUrl,
       },
       auth: true,

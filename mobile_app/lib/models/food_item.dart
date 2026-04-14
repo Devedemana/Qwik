@@ -8,6 +8,8 @@ class FoodItem {
   final String cafeteriaId;
   final bool isAvailable;
   final List<String> allergenTags;
+  final List<String> dietaryTags;
+  final List<String> ingredients;
 
   const FoodItem({
     required this.id,
@@ -19,6 +21,8 @@ class FoodItem {
     required this.cafeteriaId,
     this.isAvailable = true,
     this.allergenTags = const [],
+    this.dietaryTags = const [],
+    this.ingredients = const [],
   });
 
   String get priceDisplay => '₵${price.toStringAsFixed(2)}';
@@ -34,6 +38,14 @@ class FoodItem {
       cafeteriaId: json['cafeteriaId'] as String? ?? '',
       isAvailable: json['isAvailable'] as bool? ?? true,
       allergenTags: (json['allergenTags'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      dietaryTags: (json['dietaryTags'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      ingredients: (json['ingredients'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
