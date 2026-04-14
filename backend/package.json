@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "build": "tsc",
-    "start": "prisma db push --skip-generate && tsx src/index.ts",
+    "start": "prisma db push && tsx src/index.ts",
     "seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },
