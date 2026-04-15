@@ -34,7 +34,12 @@ class CartScreen extends StatelessWidget {
                                   onIncrement: () => cart.increment(entry.item.id),
                                   onDecrement: () => cart.decrement(entry.item.id),
                                 )),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
+                            if (!cart.hasChosenDeliveryType)
+                              _buildDeliveryToggle(cart)
+                            else
+                              _buildDeliveryLabel(cart),
+                            const SizedBox(height: 16),
                             OrderSummary(
                               subtotal: cart.subtotal,
                               taxes: cart.taxes,
@@ -98,6 +103,118 @@ class CartScreen extends StatelessWidget {
                     icon: Icons.delete_outline,
                     onTap: () => cart.clear(),
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryLabel(CartService cart) {
+    final icon = cart.isDelivery ? Icons.delivery_dining_outlined : Icons.storefront_outlined;
+    final label = cart.isDelivery ? 'Delivery  •  ₵6.00' : 'Pickup  •  Free';
+    return GestureDetector(
+      onTap: () => cart.resetDeliveryChoice(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.darkBrown,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+            const Spacer(),
+            Text('Change',
+                style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500)),
+            const SizedBox(width: 4),
+            Icon(Icons.edit_outlined, size: 14,
+                color: Colors.white.withValues(alpha: 0.6)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeliveryToggle(CartService cart) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => cart.setDelivery(false),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: !cart.isDelivery ? AppColors.darkBrown : Colors.transparent,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.storefront_outlined, size: 18,
+                        color: !cart.isDelivery ? Colors.white : AppColors.subtext),
+                    const SizedBox(width: 6),
+                    Text('Pickup',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: !cart.isDelivery ? Colors.white : AppColors.subtext,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => cart.setDelivery(true),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: cart.isDelivery ? AppColors.darkBrown : Colors.transparent,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.delivery_dining_outlined, size: 18,
+                        color: cart.isDelivery ? Colors.white : AppColors.subtext),
+                    const SizedBox(width: 6),
+                    Text('Delivery',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: cart.isDelivery ? Colors.white : AppColors.subtext,
+                        )),
+                    if (cart.isDelivery) ...[
+                      const SizedBox(width: 4),
+                      Text('₵6.00',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500,
+                          )),
+                    ],
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),

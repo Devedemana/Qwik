@@ -17,20 +17,36 @@ class CartService extends ChangeNotifier {
   String? _cafeteriaId;
   String? _cafeteriaName;
   int _splitCount = 1;
+  bool _isDelivery = false;
+  bool _hasChosenDeliveryType = false;
 
   List<CartEntry> get entries => List.unmodifiable(_entries);
   String? get cafeteriaId => _cafeteriaId;
   String? get cafeteriaName => _cafeteriaName;
   bool get isEmpty => _entries.isEmpty;
   int get totalItems => _entries.fold(0, (s, e) => s + e.quantity);
+  bool get isDelivery => _isDelivery;
+  bool get hasChosenDeliveryType => _hasChosenDeliveryType;
 
   double get subtotal =>
       _entries.fold(0, (s, e) => s + e.item.price * e.quantity);
   double get taxes => subtotal * 0.044;
-  double get deliveryFee => isEmpty ? 0 : 6.0;
+  double get deliveryFee => isEmpty ? 0 : (_isDelivery ? 6.0 : 0);
   double get total => subtotal + taxes + deliveryFee;
   int get splitCount => _splitCount;
   double get perPerson => _splitCount > 1 ? total / _splitCount : total;
+
+  void setDelivery(bool value) {
+    _isDelivery = value;
+    _hasChosenDeliveryType = true;
+    notifyListeners();
+  }
+
+  void resetDeliveryChoice() {
+    _isDelivery = false;
+    _hasChosenDeliveryType = false;
+    notifyListeners();
+  }
 
   void setSplitCount(int count) {
     _splitCount = count.clamp(1, 20);
@@ -85,6 +101,8 @@ class CartService extends ChangeNotifier {
     _cafeteriaId = null;
     _cafeteriaName = null;
     _splitCount = 1;
+    _isDelivery = false;
+    _hasChosenDeliveryType = false;
     notifyListeners();
   }
 

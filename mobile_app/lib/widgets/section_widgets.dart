@@ -16,7 +16,7 @@ Widget buildSectionLabel(String label) {
   );
 }
 
-Widget buildSectionRow(String label) {
+Widget buildSectionRow(String label, {VoidCallback? onSeeMore}) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20),
     child: Row(
@@ -32,7 +32,7 @@ Widget buildSectionRow(String label) {
           ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: onSeeMore,
           child: const Text(
             'See more',
             style: TextStyle(

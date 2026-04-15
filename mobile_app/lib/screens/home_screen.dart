@@ -132,11 +132,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 20),
                         _buildSearchBar(),
                         const SizedBox(height: 24),
-                        buildSectionRow('Cafeterias'),
+                        buildSectionRow('Cafeterias',
+                            onSeeMore: () => setState(() => _currentNavIndex = 1)),
                         const SizedBox(height: 12),
                         _buildCafeterias(),
                         const SizedBox(height: 24),
-                        buildSectionRow('Recommended for you'),
+                        buildSectionRow('Recommended for you',
+                            onSeeMore: () => setState(() => _currentNavIndex = 1)),
                         const SizedBox(height: 12),
                         _buildRecommendedGrid(),
                         const SizedBox(height: 24),
@@ -286,13 +288,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text('No cafeterias available', style: TextStyle(color: AppColors.subtext)),
       );
     }
-    return SizedBox(
-      height: 200,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: _cafeterias.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 14,
+          childAspectRatio: 0.85,
+        ),
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () => setState(() => _currentNavIndex = 1),
