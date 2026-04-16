@@ -989,6 +989,14 @@ class _AnalyticsTabState extends State<_AnalyticsTab> {
     _load();
   }
 
+  @override
+  void didUpdateWidget(_AnalyticsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cafeteriaId != widget.cafeteriaId) {
+      _load();
+    }
+  }
+
   Future<void> _load() async {
     setState(() { _loading = true; _error = null; });
     try {

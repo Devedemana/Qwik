@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
+import 'local_auth_service.dart';
 import '../models/user.dart';
 
 class AuthService {
@@ -21,6 +22,10 @@ class AuthService {
     final token = data['token'] as String;
 
     await _saveSession(user, token);
+    // Save credentials so biometric login can re-authenticate after logout
+    if (await LocalAuthService.isEnabled()) {
+      await LocalAuthService.saveCredentials(email, password);
+    }
     return user;
   }
 
@@ -67,9 +72,11 @@ class AuthService {
     try {
       await ApiService.get('/api/user/profile', auth: true);
       return true;
-    } catch (_) {
-      // Token expired or invalid — clear it
-      await ApiService.clearToken();
+    } catch (e) {
+      // Only clear token on 401 (expired/invalid) — not on network errors
+      if (ApiService.isUnauthorized(e)) {
+        await ApiService.clearToken();
+      }
       return false;
     }
   }
@@ -108,5 +115,7 @@ class AuthService {
     await prefs.remove(_keyDietary);
     await prefs.remove(_keyAllergies);
     await ApiService.clearToken();
+    // biometric_enabled and secure credentials are intentionally kept
+    // so the user can log back in with biometrics without re-entering their password
   }
 }

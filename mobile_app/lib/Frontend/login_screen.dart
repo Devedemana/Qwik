@@ -65,7 +65,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // After first successful login, offer to enable biometrics
       if (_biometricAvailable && !_biometricEnabled) {
-        await _offerBiometricSetup();
+        final enabled = await _offerBiometricSetup();
+        if (enabled) {
+          await LocalAuthService.saveCredentials(email, password);
+          setState(() => _biometricEnabled = true);
+        }
+      } else if (_biometricEnabled) {
+        // Already enabled — refresh saved credentials in case password changed
+        await LocalAuthService.saveCredentials(email, password);
       }
 
       _navigateHome(user.role, user.id);
@@ -83,19 +90,20 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       if (!passed) {
-        setState(() {
-          _isBiometricLoading = false;
-          _errorMessage = 'Biometric authentication failed';
-        });
+        setState(() { _isBiometricLoading = false; _errorMessage = 'Biometric authentication failed'; });
         return;
       }
-      // Token was already verified valid by isLoggedIn on splash — get cached user
-      final user = await AuthService.getCurrentUser();
+
+      // Use saved credentials to get a fresh token (works even after logout)
+      final creds = await LocalAuthService.getCredentials();
       if (!mounted) return;
-      if (user == null) {
-        setState(() { _isBiometricLoading = false; _errorMessage = 'Session expired. Please log in.'; });
+      if (creds == null) {
+        setState(() { _isBiometricLoading = false; _errorMessage = 'No saved credentials. Please log in once with your password.'; });
         return;
       }
+
+      final user = await AuthService.login(creds.email, creds.password);
+      if (!mounted) return;
       _navigateHome(user.role, user.id);
     } catch (e) {
       if (!mounted) return;
@@ -103,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _offerBiometricSetup() async {
+  Future<bool> _offerBiometricSetup() async {
     final enable = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -117,7 +125,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     if (enable == true) {
       await LocalAuthService.setEnabled(true);
+      return true;
     }
+    return false;
   }
 
   void _navigateHome(String role, String userId) {

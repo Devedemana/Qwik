@@ -84,7 +84,143 @@ async function main() {
     }
   }
 
-  console.log(`${menuItems.length} menu items created`);
+  console.log(`${menuItems.length} menu items upserted`);
+
+  // ── Sample Orders (for analytics demo) ──────────────────────────────────────
+  // Remove any previously seeded demo orders then recreate them cleanly
+  await prisma.order.deleteMany({ where: { qrCodeSecret: { startsWith: 'seed-' } } });
+
+  // Helper: date N days ago at a given hour (UTC)
+  const at = (daysAgo: number, hour: number) => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - daysAgo);
+    d.setUTCHours(hour, 0, 0, 0);
+    return d;
+  };
+  const pickup = (base: Date, minutesLater = 30) => new Date(base.getTime() + minutesLater * 60_000);
+
+  // Fetch created menu items so we can reference their IDs
+  const mi = await prisma.menuItem.findMany();
+  const byName = Object.fromEntries(mi.map((m) => [m.name, m]));
+
+  const orderSeeds = [
+    // ── Munchies ────────────────────────────────────────────────────────────
+    {
+      secret: 'seed-order-1', cafeteriaId: munchies.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(0, 10), totalAmount: 43,
+      items: [{ name: 'Stir-Fried Chicken', price: 35, qty: 1 }, { name: 'Indomie Special', price: 8, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-2', cafeteriaId: munchies.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(0, 13), totalAmount: 24,
+      items: [{ name: 'Prawn Fried Rice', price: 12, qty: 2 }],
+    },
+    {
+      secret: 'seed-order-3', cafeteriaId: munchies.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(1, 11), totalAmount: 35,
+      items: [{ name: 'Stir-Fried Chicken', price: 35, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-4', cafeteriaId: munchies.id, status: 'CANCELLED' as const, isPaid: false,
+      createdAt: at(1, 14), totalAmount: 12,
+      items: [{ name: 'Prawn Fried Rice', price: 12, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-5', cafeteriaId: munchies.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(2, 12), totalAmount: 28,
+      items: [{ name: 'Indomie Special', price: 8, qty: 2 }, { name: 'Prawn Fried Rice', price: 12, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-6', cafeteriaId: munchies.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(3, 9), totalAmount: 35,
+      items: [{ name: 'Stir-Fried Chicken', price: 35, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-7', cafeteriaId: munchies.id, status: 'RECEIVED' as const, isPaid: true,
+      createdAt: at(4, 11), totalAmount: 12,
+      items: [{ name: 'Prawn Fried Rice', price: 12, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-8', cafeteriaId: munchies.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(5, 10), totalAmount: 70,
+      items: [{ name: 'Stir-Fried Chicken', price: 35, qty: 2 }],
+    },
+
+    // ── HallMark Cafe ────────────────────────────────────────────────────────
+    {
+      secret: 'seed-order-9', cafeteriaId: hallmark.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(0, 12), totalAmount: 30,
+      items: [{ name: 'Jollof Rice', price: 20, qty: 1 }, { name: 'Fresh Juice', price: 10, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-10', cafeteriaId: hallmark.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(1, 13), totalAmount: 45,
+      items: [{ name: 'Grilled Tilapia', price: 45, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-11', cafeteriaId: hallmark.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(2, 11), totalAmount: 40,
+      items: [{ name: 'Jollof Rice', price: 20, qty: 2 }],
+    },
+    {
+      secret: 'seed-order-12', cafeteriaId: hallmark.id, status: 'CANCELLED' as const, isPaid: false,
+      createdAt: at(3, 10), totalAmount: 45,
+      items: [{ name: 'Grilled Tilapia', price: 45, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-13', cafeteriaId: hallmark.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(4, 14), totalAmount: 65,
+      items: [{ name: 'Jollof Rice', price: 20, qty: 1 }, { name: 'Grilled Tilapia', price: 45, qty: 1 }],
+    },
+
+    // ── Akornor ──────────────────────────────────────────────────────────────
+    {
+      secret: 'seed-order-14', cafeteriaId: akornor.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(0, 9), totalAmount: 30,
+      items: [{ name: 'Waakye', price: 15, qty: 2 }],
+    },
+    {
+      secret: 'seed-order-15', cafeteriaId: akornor.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(1, 10), totalAmount: 18,
+      items: [{ name: 'Kelewele', price: 8, qty: 1 }, { name: 'Meat Pie', price: 5, qty: 2 }],
+    },
+    {
+      secret: 'seed-order-16', cafeteriaId: akornor.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(2, 14), totalAmount: 15,
+      items: [{ name: 'Waakye', price: 15, qty: 1 }],
+    },
+    {
+      secret: 'seed-order-17', cafeteriaId: akornor.id, status: 'COMPLETED' as const, isPaid: true,
+      createdAt: at(5, 11), totalAmount: 24,
+      items: [{ name: 'Kelewele', price: 8, qty: 3 }],
+    },
+  ];
+
+  for (const o of orderSeeds) {
+    const createdAtDate = o.createdAt;
+    await prisma.order.create({
+      data: {
+        userId: customer.id,
+        cafeteriaId: o.cafeteriaId,
+        totalAmount: o.totalAmount,
+        status: o.status,
+        isPaid: o.isPaid,
+        pickupWindow: pickup(createdAtDate),
+        qrCodeSecret: o.secret,
+        createdAt: createdAtDate,
+        items: {
+          create: o.items.map((item) => ({
+            menuItemId: byName[item.name]!.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.qty,
+          })),
+        },
+      },
+    });
+  }
+
+  console.log(`${orderSeeds.length} sample orders seeded`);
   console.log('\n── Seed complete! ───────────────────────────────');
   console.log('Test accounts (all passwords: password123)');
   console.log(`  CUSTOMER : nessa@ashesi.edu.gh`);
