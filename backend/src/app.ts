@@ -16,7 +16,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express()
 
 // Serve static assets (images) — in production swap IMAGE_BASE_URL to your CDN
-const publicDir = path.resolve(__dirname, '../../public');
+const publicDir = path.resolve(__dirname, '../public');
 app.use('/images', express.static(path.join(publicDir, 'images'), {
   maxAge: '7d',       // browser cache for 7 days
   immutable: false,   // allow updates without cache busting
