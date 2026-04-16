@@ -6,26 +6,6 @@ import { env } from '../env.ts';
 const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// Picsum fallback — CORS-friendly, always works
-const Picsum = (seed: string) => `https://picsum.photos/seed/${seed}/600/400`;
-
-// Query TheMealDB by search term; returns the meal thumbnail or a Picsum fallback.
-async function mealImg(query: string, fallbackSeed: string): Promise<string> {
-  try {
-    const url = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`;
-    const res = await fetch(url);
-    const json = (await res.json()) as { meals: Array<{ strMealThumb: string }> | null };
-    if (json.meals && json.meals.length > 0) {
-      console.log(`  [img] "${query}" → TheMealDB ✓`);
-      return json.meals[0].strMealThumb;
-    }
-  } catch (e) {
-    console.log(`  [img] "${query}" fetch error:`, (e as Error).message);
-  }
-  console.log(`  [img] "${query}" → Picsum fallback`);
-  return Picsum(fallbackSeed);
-}
-
 async function main() {
   console.log('Seeding database...');
 
@@ -52,10 +32,18 @@ async function main() {
 
   console.log('Users created:', { customer: customer.email, staff: staff.email, admin: admin.email });
 
-  // ── Cafeteria images — restaurant/dining space photos from Unsplash ──────
-  const munchiesImg = 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=600&fit=crop';  // casual dining interior
-  const hallmarkImg = 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&fit=crop';     // cafe interior
-  const theSpotImg  = 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=600&fit=crop';     // restaurant/spot
+  // ── Cafeteria images ──────────────────────────────────────────────────────
+  const cafeteriaImg = (file: string) => `${env.IMAGE_BASE_URL}/images/cafeterias/${file}`;
+  const munchiesImg = cafeteriaImg('munchies.png');
+  const hallmarkImg = cafeteriaImg('hallmark.png');
+  const akornorImg  = cafeteriaImg('akornor.png');
+
+  // ── Remove stale cafeterias (menu items first to satisfy FK constraint) ──
+  const stale = await prisma.cafeteria.findMany({ where: { name: { in: ['Akornor'] } } });
+  if (stale.length > 0) {
+    await prisma.menuItem.deleteMany({ where: { cafeteriaId: { in: stale.map(c => c.id) } } });
+    await prisma.cafeteria.deleteMany({ where: { id: { in: stale.map(c => c.id) } } });
+  }
 
   // ── Cafeterias ────────────────────────────────────────────────────────────
   const munchies = await prisma.cafeteria.upsert({
@@ -70,41 +58,30 @@ async function main() {
     create: { name: 'HallMark Cafe', isOpen: true, capacityStatus: 'GREEN', imageUrl: hallmarkImg },
   });
 
-  const theSpot = await prisma.cafeteria.upsert({
-    where: { name: 'The Spot' },
-    update: { imageUrl: theSpotImg },
-    create: { name: 'The Spot', isOpen: true, capacityStatus: 'YELLOW', imageUrl: theSpotImg },
+  const akornor = await prisma.cafeteria.upsert({
+    where: { name: 'Akornor' },
+    update: { imageUrl: akornorImg },
+    create: { name: 'Akornor', isOpen: true, capacityStatus: 'YELLOW', imageUrl: akornorImg },
   });
 
-  console.log('Cafeterias created:', { munchies: munchies.id, hallmark: hallmark.id, theSpot: theSpot.id });
+  console.log('Cafeterias created:', { munchies: munchies.id, hallmark: hallmark.id, akornor: akornor.id });
 
-  // ── Menu item images — searched by closest TheMealDB term ─────────────────
-  console.log('Fetching menu item images from TheMealDB...');
-  const [
-    stirFriedChickenImg,
-    prawnFriedRiceImg,
-    indomieImg,
-    grilledTilapiaImg,
-    jollofRiceImg,
-    freshJuiceImg,
-    keleweleImg,
-    waakyeImg,
-    meatPieImg,
-  ] = await Promise.all([
-    mealImg('stir fry', 'chicken-stir'),     // Stir-Fried Chicken → Chinese stir fry
-    mealImg('fried rice', 'prawn-rice'),     // Prawn Fried Rice → Chicken Fried Rice
-    mealImg('noodles', 'noodles-indomie'),   // Indomie Special → Laksa Noodles
-    mealImg('fish', 'grilled-tilapia'),      // Grilled Tilapia → Fish pie/dish
-    mealImg('rice', 'jollof-rice'),          // Jollof Rice → Seafood Rice
-    mealImg('lemon', 'fresh-juice'),         // Fresh Juice → lemon drink
-    mealImg('plantain', 'fried-plantain'),   // Kelewele → plantain (likely Picsum)
-    mealImg('seafood rice', 'waakye-rice'),  // Waakye → rice dish
-    mealImg('beef pie', 'meat-pie'),         // Meat Pie → Minced Beef Pie
-  ]);
+  // ── Menu item images (local — served from backend/public/images/menu/) ─────
+  const menuImg = (file: string) => `${env.IMAGE_BASE_URL}/images/menu/${file}`;
+
+  const stirFriedChickenImg = menuImg('stir_fried_chicken.png');
+  const prawnFriedRiceImg   = menuImg('prawn_fried_rice.png');
+  const indomieImg          = menuImg('indomie_special.png');
+  const grilledTilapiaImg   = menuImg('grilled_tilapia.png');
+  const jollofRiceImg       = menuImg('jollof_rice.png');
+  const freshJuiceImg       = menuImg('fresh_juice.png');
+  const keleweleImg         = menuImg('kelewele.png');
+  const waakyeImg           = menuImg('waakye.png');
+  const meatPieImg          = menuImg('meat_pie.png');
 
   // ── Menu items ────────────────────────────────────────────────────────────
   await prisma.menuItem.deleteMany({
-    where: { cafeteriaId: { in: [munchies.id, hallmark.id, theSpot.id] } },
+    where: { cafeteriaId: { in: [munchies.id, hallmark.id, akornor.id] } },
   });
 
   const menuItems = [
@@ -164,9 +141,9 @@ async function main() {
       allergenTags: [],
       imageUrl: freshJuiceImg,
     },
-    // The Spot
+    // Akornor
     {
-      cafeteriaId: theSpot.id,
+      cafeteriaId: akornor.id,
       name: 'Kelewele',
       price: 8,
       category: 'Snacks',
@@ -175,7 +152,7 @@ async function main() {
       imageUrl: keleweleImg,
     },
     {
-      cafeteriaId: theSpot.id,
+      cafeteriaId: akornor.id,
       name: 'Waakye',
       price: 15,
       category: 'Breakfast',
@@ -184,7 +161,7 @@ async function main() {
       imageUrl: waakyeImg,
     },
     {
-      cafeteriaId: theSpot.id,
+      cafeteriaId: akornor.id,
       name: 'Meat Pie',
       price: 5,
       category: 'Snacks',
